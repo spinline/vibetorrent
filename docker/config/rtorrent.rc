@@ -1,0 +1,43 @@
+# rTorrent configuration file
+
+# Session directory
+session.path.set = /config/.session
+
+# Download directory
+directory.default.set = /downloads
+
+# Enable SCGI on TCP port
+network.scgi.open_port = 0.0.0.0:8000
+
+# Run as daemon
+system.daemon.set = true
+
+# Network settings
+network.port_range.set = 50000-50000
+network.port_random.set = no
+
+# DHT support
+dht.mode.set = auto
+protocol.pex.set = yes
+
+# Peer limits
+throttle.min_peers.normal.set = 1
+throttle.max_peers.normal.set = 100
+throttle.min_peers.seed.set = 1
+throttle.max_peers.seed.set = 50
+throttle.max_uploads.set = 15
+
+# Memory settings
+pieces.memory.max.set = 1800M
+network.xmlrpc.size_limit.set = 16M
+
+# Hash settings
+pieces.hash.on_completion.set = yes
+
+# Logging
+log.open_file = "rtorrent", /config/rtorrent.log
+log.add_output = "info", "rtorrent"
+
+# Enable IPv4 only
+network.bind_address.set = 0.0.0.0
+network.local_address.set = 0.0.0.0
