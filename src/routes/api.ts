@@ -31,13 +31,13 @@ apiRoutes.get('/torrents/:hash', async (c) => {
     return c.json({ error: 'Torrent not found' }, 404)
   }
   
-  const [peers, files, trackers] = await Promise.all([
+  const [peersList, filesList, trackersList] = await Promise.all([
     rtorrent.getTorrentPeers(hash),
     rtorrent.getTorrentFiles(hash),
     rtorrent.getTorrentTrackers(hash),
   ])
   
-  return c.json({ ...torrent, peers, files, trackers })
+  return c.json({ ...torrent, peersList, filesList, trackersList })
 })
 
 // Add torrent
@@ -149,6 +149,29 @@ apiRoutes.delete('/torrents/:hash', async (c) => {
       return c.json({ success: true, message: 'Torrent already removed' })
     }
     return c.json({ success: false, error: error?.message || 'Unknown error' })
+  }
+})
+
+// Set torrent priority
+apiRoutes.post('/torrents/:hash/priority', async (c) => {
+  try {
+    const hash = c.req.param('hash')
+    const { priority } = await c.req.json()
+    const success = await rtorrent.setTorrentPriority(hash, priority)
+    return c.json({ success })
+  } catch (error: any) {
+    return c.json({ success: false, error: error?.message || 'Unknown error' })
+  }
+})
+
+// Get torrent priority
+apiRoutes.get('/torrents/:hash/priority', async (c) => {
+  try {
+    const hash = c.req.param('hash')
+    const priority = await rtorrent.getTorrentPriority(hash)
+    return c.json({ priority })
+  } catch (error: any) {
+    return c.json({ priority: 2, error: error?.message || 'Unknown error' })
   }
 })
 

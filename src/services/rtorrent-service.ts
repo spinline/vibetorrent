@@ -557,6 +557,28 @@ export class RTorrentService {
       return false
     }
   }
+
+  async setTorrentPriority(hash: string, priority: number): Promise<boolean> {
+    try {
+      // priority: 0=off, 1=low, 2=normal, 3=high
+      await this.client.call('d.priority.set', [hash, priority])
+      await this.client.call('d.update_priorities', [hash])
+      return true
+    } catch (error) {
+      console.error('Failed to set torrent priority:', error)
+      return false
+    }
+  }
+
+  async getTorrentPriority(hash: string): Promise<number> {
+    try {
+      const priority = await this.client.call<number>('d.priority', [hash])
+      return priority
+    } catch (error) {
+      console.error('Failed to get torrent priority:', error)
+      return 2 // Return normal as default
+    }
+  }
 }
 
 export const rtorrent = new RTorrentService()
