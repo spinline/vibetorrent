@@ -304,6 +304,7 @@ export const getContextMenuScripts = (): string => {
       
       if (x + 180 > window.innerWidth) {
         x = btnRect.left - 188;
+        if (x < 10) x = 10; // Clamp to left edge
         prioritySubmenu.style.transformOrigin = 'top right';
       } else {
         prioritySubmenu.style.transformOrigin = 'top left';
@@ -325,6 +326,14 @@ export const getContextMenuScripts = (): string => {
       prioritySubmenu.classList.remove('opacity-100', 'scale-100', 'pointer-events-auto');
     }
     
+    priorityBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      const isOpen = !prioritySubmenu.classList.contains('opacity-0');
+      if (isOpen) hidePrioritySubmenu();
+      else showPrioritySubmenu();
+    });
+
     priorityBtn.addEventListener('mouseenter', function() {
       clearTimeout(priorityTimeout);
       showPrioritySubmenu();
@@ -341,6 +350,16 @@ export const getContextMenuScripts = (): string => {
     prioritySubmenu.addEventListener('mouseleave', function() {
       priorityTimeout = setTimeout(hidePrioritySubmenu, 150);
     });
+
+    // Touch support for priority items
+    prioritySubmenu.addEventListener('touchstart', function(e) {
+      const item = e.target.closest('.ctx-priority');
+      if (item) {
+        e.preventDefault();
+        e.stopPropagation();
+        item.click();
+      }
+    }, { passive: false });
     
     document.querySelectorAll('.ctx-priority').forEach(btn => {
       btn.addEventListener('click', async function() {
