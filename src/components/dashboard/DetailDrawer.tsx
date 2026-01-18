@@ -2,7 +2,7 @@
 export const DetailDrawer = () => (
   <div id="detail-drawer" class="fixed top-0 right-0 bottom-0 w-full md:w-[648px] bg-surface-dark border-l border-slate-800 flex flex-col drawer-shadow z-50 transition-transform duration-300 ease-in-out translate-x-full">
     {/* Drawer Header */}
-    <div class="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-background-dark">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-background-dark safe-h-16 safe-top">
       <h2 class="text-sm font-bold text-slate-300 uppercase tracking-widest">Details</h2>
       <button id="drawer-close" class="text-slate-500 hover:text-white transition-colors p-1 hover:bg-slate-800 rounded">
         <span class="material-symbols-outlined">close</span>
