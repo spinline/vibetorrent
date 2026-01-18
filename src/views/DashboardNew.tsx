@@ -97,7 +97,7 @@ export const DashboardNew = ({ torrents, systemInfo }: DashboardProps) => {
         `}} />
       </head>
       <body class="bg-background-dark text-slate-100 antialiased overflow-hidden">
-        <div class="flex h-screen" id="app-container">
+        <div class="flex h-[100dvh]" id="app-container">
           {/* Sidebar */}
           <DashboardSidebar
             labels={labels}
