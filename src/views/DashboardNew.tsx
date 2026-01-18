@@ -94,6 +94,7 @@ export const DashboardNew = ({ torrents, systemInfo }: DashboardProps) => {
           .scrollbar-thin::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
           .scrollbar-thin::-webkit-scrollbar-thumb:hover { background: #475569; }
           .material-symbols-outlined { font-size: 20px; font-variation-settings: 'FILL' 0, 'wght' 500; }
+          .touch-callout-none { -webkit-touch-callout: none !important; }
         `}} />
       </head>
       <body class="bg-background-dark text-slate-100 antialiased overflow-hidden">

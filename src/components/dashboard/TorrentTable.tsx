@@ -54,7 +54,7 @@ export const TorrentRow = ({ torrent }: { torrent: TorrentInfo }) => {
     torrent.state === 'paused' || torrent.state === 'stopped' ? 'bg-orange-500' : 'bg-primary'
 
   return (
-    <tr class="hover:bg-slate-50/50 dark:hover:bg-background-dark/20 transition-colors group cursor-pointer" data-hash={torrent.hash}>
+    <tr class="hover:bg-slate-50/50 dark:hover:bg-background-dark/20 transition-colors group cursor-pointer select-none touch-callout-none" data-hash={torrent.hash}>
       <td class="px-6 py-4">
         <div class="flex items-center gap-3">
           <span class={`material-symbols-outlined ${getFileIconColor(torrent.name)}`}>{getFileIcon(torrent.name)}</span>

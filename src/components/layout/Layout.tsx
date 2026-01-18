@@ -46,6 +46,7 @@ export const baseStyles = `
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
   ::-webkit-scrollbar-thumb:hover { background: #475569; }
+  .touch-callout-none { -webkit-touch-callout: none !important; }
 `
 
 export const Layout = ({ title, children, scripts = '', styles = '' }: LayoutProps) => {
