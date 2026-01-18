@@ -298,15 +298,23 @@ export const getContextMenuScripts = (): string => {
     
     function showPrioritySubmenu() {
       const btnRect = priorityBtn.getBoundingClientRect();
+      let x, y = btnRect.top - 20;
       
-      let x = btnRect.right + 8;
-      let y = btnRect.top - 20;
+      const spaceRight = window.innerWidth - (btnRect.right + 8);
+      const spaceLeft = btnRect.left - 8;
+      const menuWidth = 180;
       
-      if (x + 180 > window.innerWidth) {
-        x = btnRect.left - 188;
-        if (x < 10) x = 10; // Clamp to left edge
+      if (spaceRight < menuWidth && spaceLeft > spaceRight) {
+        // Not enough space on right, and there is more space on the left
+        x = btnRect.left - (menuWidth + 8);
+        if (x < 8) x = 8; // Clamp to left edge
         prioritySubmenu.style.transformOrigin = 'top right';
       } else {
+        // Either enough space on right, or right has more space than left
+        x = btnRect.right + 8;
+        if (x + menuWidth > window.innerWidth) {
+          x = window.innerWidth - (menuWidth + 8);
+        }
         prioritySubmenu.style.transformOrigin = 'top left';
       }
       
