@@ -116,16 +116,23 @@ export class RTorrentService {
       }
 
       let activePeers = 0
+      let totalDownload = 0
+      let totalUpload = 0
+
       try {
         const torrents = await this.getTorrents()
         activePeers = torrents.reduce((sum, t) => sum + t.peers, 0)
+        totalDownload = torrents.reduce((sum, t) => sum + t.downloadRate, 0)
+        totalUpload = torrents.reduce((sum, t) => sum + t.uploadRate, 0)
       } catch {
         activePeers = 0
+        totalDownload = 0
+        totalUpload = 0
       }
 
       return {
-        downloadRate,
-        uploadRate,
+        downloadRate: totalDownload,
+        uploadRate: totalUpload,
         diskSpace: { used: diskUsed, total: diskTotal },
         activePeers,
         hostname: 'localhost',
@@ -136,7 +143,6 @@ export class RTorrentService {
       this.connected = false
       this.lastError = error instanceof Error ? error.message : 'Unknown error'
       console.error('Failed to get system info:', error)
-
       return {
         downloadRate: 0,
         uploadRate: 0,
