@@ -2,7 +2,7 @@ services:
   rtorrent:
     image: jesec/rtorrent:master
     container_name: rtorrent
-
+    user: "0:0"
     ports:
       - "50000:50000" # BitTorrent port
       - "8000:8000" # SCGI/XMLRPC port
@@ -11,7 +11,7 @@ services:
     volumes:
       - ./docker/config:/config
       - ./docker/downloads:/downloads
-    command: sh -c "mkdir -p /config/.session && exec rtorrent -n -o import=/config/rtorrent.rc"
+    command: -n -o import=/config/rtorrent.rc
     restart: unless-stopped
     networks:
       - dokploy-network
