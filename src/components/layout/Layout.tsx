@@ -42,11 +42,11 @@ export const baseStyles = `
     font-size: 20px;
     font-variation-settings: 'FILL' 0, 'wght' 500;
   }
-  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
   ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: #64748b; border: 2px solid transparent; background-clip: padding-box; border-radius: 10px; }
-  ::-webkit-scrollbar-thumb:hover { background: #94a3b8; border: 2px solid transparent; background-clip: padding-box; }
-  * { scrollbar-width: thin; scrollbar-color: #64748b transparent; }
+  ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+  ::-webkit-scrollbar-thumb:hover { background: #f1f5f9; }
+  * { scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent; }
   .touch-callout-none { -webkit-touch-callout: none !important; }
   .no-scrollbar::-webkit-scrollbar { display: none; }
   .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
