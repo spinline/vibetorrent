@@ -73,6 +73,20 @@ export const getContextMenuScripts = (): string => {
     }
     
     document.addEventListener('click', function(e) {
+      const actionBtn = e.target.closest('.row-action-btn');
+      if (actionBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        const rect = actionBtn.getBoundingClientRect();
+        const fakeEvent = {
+          preventDefault: () => {},
+          clientX: rect.left - 150, // Shift left a bit so it doesn't go off screen
+          clientY: rect.bottom + 5
+        };
+        showContextMenu(fakeEvent, actionBtn.dataset.hash);
+        return;
+      }
+
       if (!ctxMenu.contains(e.target)) {
         hideContextMenu();
       }
@@ -86,6 +100,66 @@ export const getContextMenuScripts = (): string => {
       const row = e.target.closest('tr[data-hash]');
       if (row) {
         showContextMenu(e, row.dataset.hash);
+      }
+    });
+
+    // Mobile Long Press Support (Hold to right-click)
+    let holdTimer = null;
+    let longPressTriggered = false;
+    let touchStartX, touchStartY;
+    
+    document.addEventListener('touchstart', function(e) {
+      const row = e.target.closest('tr[data-hash]');
+      if (!row) return;
+      
+      // Don't trigger on multi-touch
+      if (e.touches.length > 1) return;
+      
+      longPressTriggered = false;
+      const touch = e.touches[0];
+      touchStartX = touch.clientX;
+      touchStartY = touch.clientY;
+      
+      holdTimer = setTimeout(() => {
+        longPressTriggered = true;
+        // Trigger haptic feedback if available
+        if (window.navigator && window.navigator.vibrate) {
+          window.navigator.vibrate(20);
+        }
+        
+        // Prepare a fake event object for showContextMenu
+        const fakeEvent = {
+          preventDefault: () => {},
+          clientX: touchStartX,
+          clientY: touchStartY
+        };
+        showContextMenu(fakeEvent, row.dataset.hash);
+      }, 500); // 500ms hold
+    }, { passive: true });
+    
+    document.addEventListener('touchmove', function(e) {
+      if (!holdTimer) return;
+      
+      const touch = e.touches[0];
+      const deltaX = Math.abs(touch.clientX - touchStartX);
+      const deltaY = Math.abs(touch.clientY - touchStartY);
+      
+      // If finger moves more than 10px, cancel long press (they are likely scrolling)
+      if (deltaX > 10 || deltaY > 10) {
+        clearTimeout(holdTimer);
+        holdTimer = null;
+      }
+    }, { passive: true });
+    
+    document.addEventListener('touchend', function(e) {
+      if (holdTimer) {
+        clearTimeout(holdTimer);
+        holdTimer = null;
+      }
+      
+      // If context menu was shown, don't trigger normal click actions (like opening drawer)
+      if (longPressTriggered) {
+        e.preventDefault();
       }
     });
     
