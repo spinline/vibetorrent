@@ -44,8 +44,9 @@ export const baseStyles = `
   }
   ::-webkit-scrollbar { width: 6px; height: 6px; }
   ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: rgba(226, 232, 240, 0.3); border-radius: 10px; transition: background 0.2s; }
-  ::-webkit-scrollbar-thumb:hover { background: rgba(226, 232, 240, 0.5); }
+  ::-webkit-scrollbar-thumb { background: #64748b; border: 2px solid transparent; background-clip: padding-box; border-radius: 10px; }
+  ::-webkit-scrollbar-thumb:hover { background: #94a3b8; border: 2px solid transparent; background-clip: padding-box; }
+  * { scrollbar-width: thin; scrollbar-color: #64748b transparent; }
   .touch-callout-none { -webkit-touch-callout: none !important; }
   .no-scrollbar::-webkit-scrollbar { display: none; }
   .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
