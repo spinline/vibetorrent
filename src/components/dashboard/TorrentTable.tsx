@@ -59,7 +59,7 @@ export const TorrentRow = ({ torrent }: { torrent: TorrentInfo }) => {
         <div class="flex items-center gap-3">
           <span class={`material-symbols-outlined ${getFileIconColor(torrent.name)}`}>{getFileIcon(torrent.name)}</span>
           <div class="min-w-0">
-            <div class="text-sm font-bold truncate max-w-xs" title={torrent.name}>{torrent.name}</div>
+            <div class="text-sm font-bold sm:truncate max-w-xs sm:max-w-md" title={torrent.name}>{torrent.name}</div>
           </div>
         </div>
       </td>
@@ -92,17 +92,19 @@ export const TorrentRow = ({ torrent }: { torrent: TorrentInfo }) => {
 }
 
 export const TorrentTable = ({ torrents }: TorrentTableProps) => (
-  <div class="bg-background-light dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-    <table class="w-full text-left">
-      <TorrentTableHeader />
-      <tbody id="torrent-table-body" class="divide-y divide-slate-100 dark:divide-slate-800">
-        {torrents.length === 0 ? (
-          <EmptyTorrents />
-        ) : (
-          torrents.map((torrent) => <TorrentRow torrent={torrent} />)
-        )}
-      </tbody>
-    </table>
+  <div class="bg-background-light dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden flex flex-col">
+    <div class="overflow-x-auto scrollbar-thin">
+      <table class="w-full text-left min-w-[700px] sm:min-w-0">
+        <TorrentTableHeader />
+        <tbody id="torrent-table-body" class="divide-y divide-slate-100 dark:divide-slate-800">
+          {torrents.length === 0 ? (
+            <EmptyTorrents />
+          ) : (
+            torrents.map((torrent) => <TorrentRow torrent={torrent} />)
+          )}
+        </tbody>
+      </table>
+    </div>
 
     <div class="px-6 py-4 bg-slate-50 dark:bg-background-dark/30 border-t border-slate-200 dark:border-slate-800 flex justify-between items-center">
       <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">
