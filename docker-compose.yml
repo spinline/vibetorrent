@@ -11,7 +11,7 @@ services:
     volumes:
       - ./docker/config:/config
       - ./docker/downloads:/downloads
-    command: -n -o import=/config/rtorrent.rc
+    command: sh -c "mkdir -p /config/.session && exec rtorrent -n -o import=/config/rtorrent.rc"
     restart: unless-stopped
     networks:
       - dokploy-network
