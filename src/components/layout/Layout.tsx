@@ -47,7 +47,18 @@ export const baseStyles = `
   ::-webkit-scrollbar-thumb { background: #94a3b8; border: 2px solid #0f1115; background-clip: padding-box; border-radius: 10px; }
   ::-webkit-scrollbar-thumb:hover { background: #cbd5e1; }
   * { scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent; }
-  .touch-callout-none { -webkit-touch-callout: none !important; }
+  .touch-callout-none { 
+    -webkit-touch-callout: none !important; 
+    -webkit-user-select: none !important; 
+    user-select: none !important;
+    -webkit-tap-highlight-color: transparent !important;
+  }
+  #torrent-table-body tr {
+    -webkit-touch-callout: none !important;
+    -webkit-user-select: none !important;
+    user-select: none !important;
+    -webkit-tap-highlight-color: transparent !important;
+  }
   .no-scrollbar::-webkit-scrollbar { display: none; }
   .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   .safe-top { 
