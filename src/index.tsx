@@ -1,8 +1,8 @@
 import { Hono } from 'hono'
 import { serveStatic } from 'hono/bun'
 import { getCookie } from 'hono/cookie'
-import { DashboardNew as Dashboard } from './views/DashboardNew'
-import { Settings } from './views/SettingsNew'
+import { Dashboard } from './views/Dashboard'
+import { Settings } from './views/Settings'
 import { apiRoutes } from './routes/api'
 import { RTorrentService } from './services/rtorrent-service'
 
