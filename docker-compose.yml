@@ -2,7 +2,7 @@ services:
   rtorrent:
     image: jesec/rtorrent:master
     container_name: rtorrent
-    user: "1000:1000"
+
     ports:
       - "50000:50000" # BitTorrent port
       - "8000:8000" # SCGI/XMLRPC port
