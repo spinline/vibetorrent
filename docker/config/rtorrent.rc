@@ -35,8 +35,8 @@ network.xmlrpc.size_limit.set = 16M
 pieces.hash.on_completion.set = yes
 
 # Logging
-log.open_file = "rtorrent", /config/rtorrent.log
-log.add_output = "info", "rtorrent"
+# log.open_file = "rtorrent", /config/rtorrent.log
+# log.add_output = "info", "rtorrent"
 
 # Enable IPv4 only
 network.bind_address.set = 0.0.0.0
