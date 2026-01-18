@@ -1,6 +1,7 @@
 import { Hono } from 'hono'
 import { serveStatic } from 'hono/bun'
 import { Dashboard } from './views/Dashboard'
+import { Settings } from './views/Settings'
 import { apiRoutes } from './routes/api'
 import { RTorrentService } from './services/rtorrent-service'
 
@@ -40,13 +41,10 @@ app.get('/', async (c) => {
 // Settings page
 app.get('/settings', async (c) => {
   try {
-    const [torrents, systemInfo] = await Promise.all([
-      rtorrent.getTorrents(),
-      rtorrent.getSystemInfo()
-    ])
-    return c.html(<Dashboard torrents={torrents} systemInfo={systemInfo} />)
+    const systemInfo = await rtorrent.getSystemInfo()
+    return c.html(<Settings systemInfo={systemInfo} />)
   } catch (error) {
-    return c.html(<Dashboard torrents={[]} systemInfo={defaultSystemInfo} />)
+    return c.html(<Settings systemInfo={defaultSystemInfo} />)
   }
 })
 

@@ -47,6 +47,7 @@ export interface PeerInfo {
 }
 
 export interface FileInfo {
+  index: number
   path: string
   size: number
   completed: number
@@ -277,7 +278,8 @@ export class RTorrentService {
         'f.priority=',
       ])
 
-      return result.map(f => ({
+      return result.map((f, index) => ({
+        index,
         path: f[0],
         size: f[1],
         completed: f[3] > 0 ? (f[2] / f[3]) * f[1] : 0,
@@ -577,6 +579,23 @@ export class RTorrentService {
     } catch (error) {
       console.error('Failed to get torrent priority:', error)
       return 2 // Return normal as default
+    }
+  }
+
+  async setFilePriority(hash: string, fileIndex: number, priority: number): Promise<boolean> {
+    try {
+      // priority: 0=off, 1=normal, 2=high (Note: rTorrent file priority values are different from torrent priority)
+      // Actually standard values: 0=off, 1=normal, 2=high. 
+      // Some sources say: 0=don't download, 1=normal, 2=high.
+      
+      // Target format: HASH:fINDEX
+      const target = `${hash}:f${fileIndex}`
+      await this.client.call('f.priority.set', [target, priority])
+      await this.client.call('d.update_priorities', [hash])
+      return true
+    } catch (error) {
+      console.error('Failed to set file priority:', error)
+      return false
     }
   }
 }

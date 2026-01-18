@@ -175,6 +175,19 @@ apiRoutes.get('/torrents/:hash/priority', async (c) => {
   }
 })
 
+// Set file priority
+apiRoutes.post('/torrents/:hash/files/:index/priority', async (c) => {
+  try {
+    const hash = c.req.param('hash')
+    const index = parseInt(c.req.param('index'))
+    const { priority } = await c.req.json()
+    const success = await rtorrent.setFilePriority(hash, index, priority)
+    return c.json({ success })
+  } catch (error: any) {
+    return c.json({ success: false, error: error?.message || 'Unknown error' })
+  }
+})
+
 // Settings
 apiRoutes.post('/settings/download-limit', async (c) => {
   const { limit } = await c.req.json()
