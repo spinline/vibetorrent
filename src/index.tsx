@@ -1,7 +1,7 @@
 import { Hono } from 'hono'
 import { serveStatic } from 'hono/bun'
-import { Dashboard } from './views/Dashboard'
-import { Settings } from './views/Settings'
+import { DashboardNew as Dashboard } from './views/DashboardNew'
+import { Settings } from './views/SettingsNew'
 import { apiRoutes } from './routes/api'
 import { RTorrentService } from './services/rtorrent-service'
 
@@ -14,26 +14,40 @@ app.use('/public/*', serveStatic({ root: './' }))
 // API routes
 app.route('/api', apiRoutes)
 
-const defaultSystemInfo = {
-  downloadRate: 0,
-  uploadRate: 0,
-  diskSpace: { used: 0, total: 0 },
+const defaultStats = {
+  downloadSpeed: 0,
+  uploadSpeed: 0,
+  diskFree: 0,
+  diskTotal: 0,
   activePeers: 0,
-  hostname: 'localhost',
-  clientVersion: 'N/A',
-  libraryVersion: 'N/A',
+  totalTorrents: 0
 }
 
 // Dashboard
 app.get('/', async (c) => {
+  // Prevent caching
+  c.header('Cache-Control', 'no-cache, no-store, must-revalidate')
+  c.header('Pragma', 'no-cache')
+  c.header('Expires', '0')
+  
   try {
     const [torrents, systemInfo] = await Promise.all([
       rtorrent.getTorrents(),
       rtorrent.getSystemInfo()
     ])
+    
     return c.html(<Dashboard torrents={torrents} systemInfo={systemInfo} />)
   } catch (error) {
     console.error('Error loading dashboard:', error)
+    const defaultSystemInfo = {
+      downloadRate: 0,
+      uploadRate: 0,
+      diskSpace: { used: 0, total: 0 },
+      activePeers: 0,
+      hostname: 'localhost',
+      clientVersion: 'N/A',
+      libraryVersion: 'N/A'
+    }
     return c.html(<Dashboard torrents={[]} systemInfo={defaultSystemInfo} />)
   }
 })
@@ -44,6 +58,15 @@ app.get('/settings', async (c) => {
     const systemInfo = await rtorrent.getSystemInfo()
     return c.html(<Settings systemInfo={systemInfo} />)
   } catch (error) {
+    const defaultSystemInfo = {
+      downloadRate: 0,
+      uploadRate: 0,
+      diskSpace: { used: 0, total: 0 },
+      activePeers: 0,
+      hostname: 'localhost',
+      clientVersion: 'N/A',
+      libraryVersion: 'N/A',
+    }
     return c.html(<Settings systemInfo={defaultSystemInfo} />)
   }
 })
@@ -55,8 +78,18 @@ app.get('/torrent/:hash', async (c) => {
       rtorrent.getTorrents(),
       rtorrent.getSystemInfo()
     ])
+    
     return c.html(<Dashboard torrents={torrents} systemInfo={systemInfo} />)
   } catch (error) {
+    const defaultSystemInfo = {
+      downloadRate: 0,
+      uploadRate: 0,
+      diskSpace: { used: 0, total: 0 },
+      activePeers: 0,
+      hostname: 'localhost',
+      clientVersion: 'N/A',
+      libraryVersion: 'N/A'
+    }
     return c.html(<Dashboard torrents={[]} systemInfo={defaultSystemInfo} />)
   }
 })

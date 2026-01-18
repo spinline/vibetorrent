@@ -1,0 +1,10 @@
+// Dashboard barrel exports
+export { DashboardSidebar } from './Sidebar'
+export { DashboardHeader } from './Header'
+export { StatsGrid } from './StatsGrid'
+export { TorrentTable, TorrentTableHeader, TorrentRow, EmptyTorrents, ViewTabs } from './TorrentTable'
+export { DetailDrawer, DrawerBackdrop } from './DetailDrawer'
+export { ContextMenu, PrioritySubmenu } from './ContextMenu'
+export { LabelModal, DeleteModal, AddTorrentModal } from './Modals'
+export { getAllDashboardScripts, getDashboardScripts, getContextMenuScripts, getAddModalScripts } from './scripts/index'
+export * from './utils'
