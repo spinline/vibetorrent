@@ -76,22 +76,35 @@ export const getAllDashboardScripts = (): string => {
         const sidebar = document.getElementById('dashboard-sidebar');
         const sidebarBackdrop = document.getElementById('sidebar-backdrop');
         
+        console.log('Mobile Menu Init:', { 
+          btn: !!mobileMenuBtn, 
+          sidebar: !!sidebar, 
+          backdrop: !!sidebarBackdrop 
+        });
+
         if (mobileMenuBtn && sidebar && sidebarBackdrop) {
-          const toggleSidebar = () => {
+          const toggleSidebar = (e) => {
+            e.preventDefault();
+            console.log('Toggle Sidebar Clicked');
+            
             const isClosed = sidebar.classList.contains('-translate-x-full');
             if (isClosed) {
+              console.log('Opening sidebar');
               sidebar.classList.remove('-translate-x-full');
               sidebarBackdrop.classList.remove('hidden');
-              setTimeout(() => sidebarBackdrop.classList.remove('opacity-0'), 10);
+              requestAnimationFrame(() => {
+                sidebarBackdrop.classList.remove('opacity-0');
+              });
             } else {
+              console.log('Closing sidebar');
               sidebar.classList.add('-translate-x-full');
               sidebarBackdrop.classList.add('opacity-0');
               setTimeout(() => sidebarBackdrop.classList.add('hidden'), 300);
             }
           };
           
-          mobileMenuBtn.addEventListener('click', toggleSidebar);
-          sidebarBackdrop.addEventListener('click', toggleSidebar);
+          mobileMenuBtn.onclick = toggleSidebar; // Direct assignment to be sure
+          sidebarBackdrop.onclick = toggleSidebar;
         }
 
         console.log('Dashboard initialized successfully');

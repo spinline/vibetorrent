@@ -2,7 +2,7 @@ export const DashboardHeader = () => {
   return (
     <header class="h-16 border-b border-slate-200 dark:border-slate-800 bg-background-light dark:bg-background-dark flex items-center justify-between px-8 shrink-0">
       <div class="flex items-center gap-6">
-        <button id="mobile-menu-toggle" class="md:hidden text-slate-500 hover:text-white transition-colors">
+        <button id="mobile-menu-toggle" class="md:hidden text-slate-500 hover:text-white transition-colors relative z-50 p-2">
           <span class="material-symbols-outlined">menu</span>
         </button>
         <div class="relative w-64 hidden md:block">
