@@ -13,6 +13,8 @@ services:
       - ./docker/downloads:/downloads
     command: -n -o import=/config/rtorrent.rc
     restart: unless-stopped
+    networks:
+      - dokploy-network
 
   web:
     build: .
@@ -26,3 +28,15 @@ services:
     depends_on:
       - rtorrent
     restart: unless-stopped
+    networks:
+      - dokploy-network
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.rtorrent-web.rule=Host(`rtorrent.vibetorrent.com`)
+      - traefik.http.routers.rtorrent-web.entrypoints=websecure
+      - traefik.http.routers.rtorrent-web.tls.certresolver=letsencrypt
+      - traefik.http.services.rtorrent-web.loadbalancer.server.port=3001
+
+networks:
+  dokploy-network:
+    external: true
