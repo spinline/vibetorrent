@@ -281,13 +281,33 @@ export const getContextMenuScripts = (): string => {
     document.getElementById('ctx-recheck').addEventListener('click', () => ctxAction('recheck'));
     document.getElementById('ctx-reannounce').addEventListener('click', () => ctxAction('reannounce'));
 
-    // Mobile touch support for menu items
+    // Mobile touch support for menu items (Refined to only trigger on release without movement)
+    let menuTouchStartX, menuTouchStartY;
+    
     ctxMenu.addEventListener('touchstart', function(e) {
       const item = e.target.closest('button');
       if (item) {
-        e.preventDefault(); // Prevent emulated click
+        // Just record start position, don't trigger yet
+        const touch = e.touches[0];
+        menuTouchStartX = touch.clientX;
+        menuTouchStartY = touch.clientY;
         e.stopPropagation();
-        item.click(); // Trigger the click handler we already have
+      }
+    }, { passive: true });
+
+    ctxMenu.addEventListener('touchend', function(e) {
+      const item = e.target.closest('button');
+      if (item) {
+        const touch = e.changedTouches[0];
+        const deltaX = Math.abs(touch.clientX - menuTouchStartX);
+        const deltaY = Math.abs(touch.clientY - menuTouchStartY);
+        
+        // Only trigger if movement was minimal (not a scroll or swipe away)
+        if (deltaX < 10 && deltaY < 10) {
+          e.preventDefault();
+          e.stopPropagation();
+          item.click();
+        }
       }
     }, { passive: false });
     
@@ -359,13 +379,30 @@ export const getContextMenuScripts = (): string => {
       priorityTimeout = setTimeout(hidePrioritySubmenu, 150);
     });
 
-    // Touch support for priority items
+    // Touch support for priority items (Refined to only trigger on release)
+    let priorityTouchStartX, priorityTouchStartY;
     prioritySubmenu.addEventListener('touchstart', function(e) {
       const item = e.target.closest('.ctx-priority');
       if (item) {
-        e.preventDefault();
+        const touch = e.touches[0];
+        priorityTouchStartX = touch.clientX;
+        priorityTouchStartY = touch.clientY;
         e.stopPropagation();
-        item.click();
+      }
+    }, { passive: true });
+
+    prioritySubmenu.addEventListener('touchend', function(e) {
+      const item = e.target.closest('.ctx-priority');
+      if (item) {
+        const touch = e.changedTouches[0];
+        const deltaX = Math.abs(touch.clientX - priorityTouchStartX);
+        const deltaY = Math.abs(touch.clientY - priorityTouchStartY);
+        
+        if (deltaX < 10 && deltaY < 10) {
+          e.preventDefault();
+          e.stopPropagation();
+          item.click();
+        }
       }
     }, { passive: false });
     
