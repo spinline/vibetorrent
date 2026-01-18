@@ -166,7 +166,7 @@ app.get('/torrent/:hash', async (c) => {
   }
 })
 
-const port = parseInt(process.env.PORT || '3000')
+const port = parseInt(process.env.PORT || '3001')
 console.log(`🚀 rTorrent Web UI running at http://localhost:${port}`)
 console.log(`📡 SSE endpoint available at /api/events`)
 
