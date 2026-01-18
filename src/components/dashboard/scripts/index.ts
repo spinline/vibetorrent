@@ -71,6 +71,29 @@ export const getAllDashboardScripts = (): string => {
         ${getDashboardScripts()}
         ${getContextMenuScripts()}
         ${getAddModalScripts()}
+        // Mobile Menu Logic
+        const mobileMenuBtn = document.getElementById('mobile-menu-toggle');
+        const sidebar = document.getElementById('dashboard-sidebar');
+        const sidebarBackdrop = document.getElementById('sidebar-backdrop');
+        
+        if (mobileMenuBtn && sidebar && sidebarBackdrop) {
+          const toggleSidebar = () => {
+            const isClosed = sidebar.classList.contains('-translate-x-full');
+            if (isClosed) {
+              sidebar.classList.remove('-translate-x-full');
+              sidebarBackdrop.classList.remove('hidden');
+              setTimeout(() => sidebarBackdrop.classList.remove('opacity-0'), 10);
+            } else {
+              sidebar.classList.add('-translate-x-full');
+              sidebarBackdrop.classList.add('opacity-0');
+              setTimeout(() => sidebarBackdrop.classList.add('hidden'), 300);
+            }
+          };
+          
+          mobileMenuBtn.addEventListener('click', toggleSidebar);
+          sidebarBackdrop.addEventListener('click', toggleSidebar);
+        }
+
         console.log('Dashboard initialized successfully');
       } catch (e) {
         console.error('Dashboard initialization error:', e.message, e.stack);

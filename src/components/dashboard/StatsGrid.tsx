@@ -16,13 +16,13 @@ export const StatsGrid = ({ stats }: StatsGridProps) => {
   const uploadSpeed = formatSpeed(stats.uploadSpeed)
   const diskFree = formatBytesShort(stats.diskFree)
   const diskTotal = formatBytesShort(stats.diskTotal)
-  const diskPercent = stats.diskTotal > 0 
-    ? Math.round(((stats.diskTotal - stats.diskFree) / stats.diskTotal) * 100) 
+  const diskPercent = stats.diskTotal > 0
+    ? Math.round(((stats.diskTotal - stats.diskFree) / stats.diskTotal) * 100)
     : 0
   const totalPeers = stats.activePeers
 
   return (
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
       {/* Download Speed */}
       <div class="bg-surface-dark p-5 rounded-xl border border-slate-800 shadow-sm flex flex-col">
         <span class="text-xs font-bold text-slate-500 uppercase mb-2">Download Speed</span>
@@ -36,7 +36,7 @@ export const StatsGrid = ({ stats }: StatsGridProps) => {
           )}
         </div>
       </div>
-      
+
       {/* Upload Speed */}
       <div class="bg-surface-dark p-5 rounded-xl border border-slate-800 shadow-sm flex flex-col">
         <span class="text-xs font-bold text-slate-500 uppercase mb-2">Upload Speed</span>
@@ -50,7 +50,7 @@ export const StatsGrid = ({ stats }: StatsGridProps) => {
           )}
         </div>
       </div>
-      
+
       {/* Disk Space */}
       <div class="bg-surface-dark p-5 rounded-xl border border-slate-800 shadow-sm flex flex-col">
         <span class="text-xs font-bold text-slate-500 uppercase mb-2">Disk Space</span>
@@ -62,7 +62,7 @@ export const StatsGrid = ({ stats }: StatsGridProps) => {
           </div>
         </div>
       </div>
-      
+
       {/* Active Peers */}
       <div class="bg-surface-dark p-5 rounded-xl border border-slate-800 shadow-sm flex flex-col">
         <span class="text-xs font-bold text-slate-500 uppercase mb-2">Active Peers</span>
