@@ -49,6 +49,37 @@ export const getAllDashboardScripts = (): string => {
     var currentFilter, searchQuery, sortColumn, sortDirection;
     var drawer, drawerBackdrop, torrentTableBody, ctxMenu;
     
+    // Global Mobile Menu Toggle Logic (using event delegation for robustness)
+    document.addEventListener('click', function(e) {
+      const toggleBtn = e.target.closest('#mobile-menu-toggle');
+      const sidebar = document.getElementById('dashboard-sidebar');
+      const backdrop = document.getElementById('sidebar-backdrop');
+      
+      if (toggleBtn) {
+        e.preventDefault();
+        if (sidebar && backdrop) {
+          const isClosed = sidebar.classList.contains('-translate-x-full');
+          if (isClosed) {
+            sidebar.classList.remove('-translate-x-full');
+            backdrop.classList.remove('hidden');
+            requestAnimationFrame(() => backdrop.classList.remove('opacity-0'));
+          } else {
+            sidebar.classList.add('-translate-x-full');
+            backdrop.classList.add('opacity-0');
+            setTimeout(() => backdrop.classList.add('hidden'), 300);
+          }
+        }
+        return;
+      }
+      
+      const isBackdrop = e.target.id === 'sidebar-backdrop';
+      if (isBackdrop && sidebar) {
+        sidebar.classList.add('-translate-x-full');
+        e.target.classList.add('opacity-0');
+        setTimeout(() => e.target.classList.add('hidden'), 300);
+      }
+    });
+
     function initDashboard() {
       // Check if critical elements exist
       const criticalElements = [
@@ -71,42 +102,6 @@ export const getAllDashboardScripts = (): string => {
         ${getDashboardScripts()}
         ${getContextMenuScripts()}
         ${getAddModalScripts()}
-        // Mobile Menu Logic
-        const mobileMenuBtn = document.getElementById('mobile-menu-toggle');
-        const sidebar = document.getElementById('dashboard-sidebar');
-        const sidebarBackdrop = document.getElementById('sidebar-backdrop');
-        
-        console.log('Mobile Menu Init:', { 
-          btn: !!mobileMenuBtn, 
-          sidebar: !!sidebar, 
-          backdrop: !!sidebarBackdrop 
-        });
-
-        if (mobileMenuBtn && sidebar && sidebarBackdrop) {
-          const toggleSidebar = (e) => {
-            e.preventDefault();
-            console.log('Toggle Sidebar Clicked');
-            
-            const isClosed = sidebar.classList.contains('-translate-x-full');
-            if (isClosed) {
-              console.log('Opening sidebar');
-              sidebar.classList.remove('-translate-x-full');
-              sidebarBackdrop.classList.remove('hidden');
-              requestAnimationFrame(() => {
-                sidebarBackdrop.classList.remove('opacity-0');
-              });
-            } else {
-              console.log('Closing sidebar');
-              sidebar.classList.add('-translate-x-full');
-              sidebarBackdrop.classList.add('opacity-0');
-              setTimeout(() => sidebarBackdrop.classList.add('hidden'), 300);
-            }
-          };
-          
-          mobileMenuBtn.onclick = toggleSidebar; // Direct assignment to be sure
-          sidebarBackdrop.onclick = toggleSidebar;
-        }
-
         console.log('Dashboard initialized successfully');
       } catch (e) {
         console.error('Dashboard initialization error:', e.message, e.stack);
