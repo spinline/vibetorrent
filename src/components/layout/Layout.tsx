@@ -50,6 +50,8 @@ export const baseStyles = `
   .touch-callout-none { -webkit-touch-callout: none !important; }
   .no-scrollbar::-webkit-scrollbar { display: none; }
   .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  .safe-top { padding-top: env(safe-area-inset-top); }
+  .safe-h-16 { height: calc(4rem + env(safe-area-inset-top)); }
 `
 
 export const Layout = ({ title, children, scripts = '', styles = '' }: LayoutProps) => {
