@@ -48,6 +48,12 @@ export const getContextMenuScripts = (): string => {
       let x = e.clientX;
       let y = e.clientY;
       
+      // On mobile, offset the menu so it's not directly under the finger
+      if (e.isTouch) {
+        y += 20;
+        x -= 20;
+      }
+      
       if (x + menuWidth > window.innerWidth) {
         x = Math.max(0, x - menuWidth);
       }
@@ -109,33 +115,43 @@ export const getContextMenuScripts = (): string => {
     let touchStartX, touchStartY;
     
     document.addEventListener('touchstart', function(e) {
+      // 1. Handle Closing if menu is open
+      if (ctxMenu && !ctxMenu.classList.contains('hidden')) {
+        if (!ctxMenu.contains(e.target)) {
+          hideContextMenu();
+          // If we are closing the menu, don't start a new hold timer
+          return;
+        }
+      }
+
       const row = e.target.closest('tr[data-hash]');
       if (!row) return;
       
       // Don't trigger on multi-touch
       if (e.touches.length > 1) return;
       
-      longPressTriggered = false;
+      longPressTriggered = false; // Reset for new touch
       const touch = e.touches[0];
       touchStartX = touch.clientX;
       touchStartY = touch.clientY;
       
       holdTimer = setTimeout(() => {
         longPressTriggered = true;
-        // Trigger haptic feedback if available
+        
+        // Haptic feedback
         if (window.navigator && window.navigator.vibrate) {
-          window.navigator.vibrate(20);
+          window.navigator.vibrate(40);
         }
         
-        // Prepare a fake event object for showContextMenu
         const fakeEvent = {
           preventDefault: () => {},
           clientX: touchStartX,
-          clientY: touchStartY
+          clientY: touchStartY,
+          isTouch: true
         };
         showContextMenu(fakeEvent, row.dataset.hash);
-      }, 500); // 500ms hold
-    }, { passive: true });
+      }, 500);
+    }, { passive: false }); // Need to potentially preventDefault later
     
     document.addEventListener('touchmove', function(e) {
       if (!holdTimer) return;
@@ -144,8 +160,7 @@ export const getContextMenuScripts = (): string => {
       const deltaX = Math.abs(touch.clientX - touchStartX);
       const deltaY = Math.abs(touch.clientY - touchStartY);
       
-      // If finger moves more than 10px, cancel long press (they are likely scrolling)
-      if (deltaX > 10 || deltaY > 10) {
+      if (deltaX > 15 || deltaY > 15) {
         clearTimeout(holdTimer);
         holdTimer = null;
       }
@@ -157,11 +172,13 @@ export const getContextMenuScripts = (): string => {
         holdTimer = null;
       }
       
-      // If context menu was shown, don't trigger normal click actions (like opening drawer)
+      // If menu was just opened via long press, prevent the "click" that follows 
+      // which would otherwise open the detail drawer.
       if (longPressTriggered) {
         e.preventDefault();
+        longPressTriggered = false; // Consume it
       }
-    });
+    }, { passive: false });
     
     async function ctxAction(action, payload = {}) {
       if (!ctxHash) return;
@@ -263,6 +280,16 @@ export const getContextMenuScripts = (): string => {
     document.getElementById('ctx-stop').addEventListener('click', () => ctxAction('stop'));
     document.getElementById('ctx-recheck').addEventListener('click', () => ctxAction('recheck'));
     document.getElementById('ctx-reannounce').addEventListener('click', () => ctxAction('reannounce'));
+
+    // Mobile touch support for menu items
+    ctxMenu.addEventListener('touchstart', function(e) {
+      const item = e.target.closest('button');
+      if (item) {
+        e.preventDefault(); // Prevent emulated click
+        e.stopPropagation();
+        item.click(); // Trigger the click handler we already have
+      }
+    }, { passive: false });
     
     // Priority submenu
     const priorityBtn = document.getElementById('ctx-priority-btn');
