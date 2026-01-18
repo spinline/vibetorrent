@@ -67,7 +67,7 @@ export class RTorrentService {
   private connected: boolean = false
   private lastError: string | null = null
 
-  constructor(host: string = 'localhost', port: number = 8000) {
+  constructor(host: string = process.env.RTORRENT_HOST || 'localhost', port: number = parseInt(process.env.RTORRENT_PORT || '8000')) {
     this.client = new SCGIClient(host, port)
   }
 
@@ -136,7 +136,7 @@ export class RTorrentService {
       this.connected = false
       this.lastError = error instanceof Error ? error.message : 'Unknown error'
       console.error('Failed to get system info:', error)
-      
+
       return {
         downloadRate: 0,
         uploadRate: 0,
@@ -183,7 +183,7 @@ export class RTorrentService {
 
       return result.map((t) => {
         if (!Array.isArray(t)) return null
-        
+
         const completed = t[3] || 0
         const size = t[2] || 0
         // Ensure progress is between 0-100 and handle edge cases
@@ -324,28 +324,28 @@ export class RTorrentService {
   }): Promise<boolean> {
     try {
       const { downloadPath = '/downloads', priority = 2, autoStart = true, label = '' } = options || {}
-      
+
       // Build command options string
       // rTorrent's load commands accept optional tied-file and execution commands
       // d.directory.set sets download path, d.custom1.set sets label, d.priority.set sets priority
       const commands: string[] = []
-      
+
       if (downloadPath && downloadPath !== '/downloads') {
         commands.push(`d.directory.set=${downloadPath}`)
       }
-      
+
       if (label) {
         commands.push(`d.custom1.set=${label}`)
       }
-      
+
       if (priority !== 2) {
         // priority: 0=off, 1=low, 2=normal, 3=high
         commands.push(`d.priority.set=${priority}`)
       }
-      
+
       // Use load.start or load.normal based on autoStart
       const method = autoStart ? 'load.start' : 'load.normal'
-      
+
       if (commands.length > 0) {
         await this.client.call(method, ['', url, ...commands])
       } else {
@@ -367,25 +367,25 @@ export class RTorrentService {
     try {
       const { downloadPath = '/downloads', priority = 2, autoStart = true, label = '' } = options || {}
       const buffer = Buffer.from(base64Data, 'base64')
-      
+
       // Build command options
       const commands: string[] = []
-      
+
       if (downloadPath && downloadPath !== '/downloads') {
         commands.push(`d.directory.set=${downloadPath}`)
       }
-      
+
       if (label) {
         commands.push(`d.custom1.set=${label}`)
       }
-      
+
       if (priority !== 2) {
         commands.push(`d.priority.set=${priority}`)
       }
-      
+
       // Use load.raw_start or load.raw based on autoStart
       const method = autoStart ? 'load.raw_start' : 'load.raw'
-      
+
       if (commands.length > 0) {
         await this.client.call(method, ['', buffer, ...commands])
       } else {
@@ -412,7 +412,7 @@ export class RTorrentService {
     try {
       // First check if torrent is closed (stopped)
       const isOpen = await this.client.call<number>('d.is_open', [hash])
-      
+
       if (isOpen === 0) {
         // Torrent is closed/stopped, need to open first then start
         await this.client.call('d.open', [hash])
@@ -454,10 +454,10 @@ export class RTorrentService {
       // First check if torrent exists and get path if we need to delete files
       let basePath = ''
       let isMultiFile = false
-      
+
       try {
         await this.client.call('d.hash', [hash])
-        
+
         if (deleteFiles) {
           // Get the base path and check if multi-file
           basePath = await this.client.call('d.base_path', [hash]) as string
@@ -471,17 +471,17 @@ export class RTorrentService {
         }
         throw checkError
       }
-      
+
       // Close and erase the torrent from rTorrent
       await this.client.call('d.close', [hash])
       await this.client.call('d.erase', [hash])
-      
+
       // Delete files if requested
       if (deleteFiles && basePath) {
         try {
           const fs = await import('fs/promises')
           const path = await import('path')
-          
+
           // Check if path exists
           try {
             await fs.access(basePath)
@@ -489,9 +489,9 @@ export class RTorrentService {
             console.log(`Path doesn't exist, skipping file deletion: ${basePath}`)
             return true
           }
-          
+
           const stat = await fs.stat(basePath)
-          
+
           if (stat.isDirectory()) {
             // Multi-file torrent - delete the entire directory
             await fs.rm(basePath, { recursive: true, force: true })
@@ -507,7 +507,7 @@ export class RTorrentService {
           // The torrent was already removed from rTorrent
         }
       }
-      
+
       return true
     } catch (error: any) {
       // If "not found" error, treat as success (already removed)
@@ -587,7 +587,7 @@ export class RTorrentService {
       // priority: 0=off, 1=normal, 2=high (Note: rTorrent file priority values are different from torrent priority)
       // Actually standard values: 0=off, 1=normal, 2=high. 
       // Some sources say: 0=don't download, 1=normal, 2=high.
-      
+
       // Target format: HASH:fINDEX
       const target = `${hash}:f${fileIndex}`
       await this.client.call('f.priority.set', [target, priority])

@@ -21,7 +21,7 @@ interface DashboardProps {
 }
 
 export const DashboardNew = ({ torrents, systemInfo }: DashboardProps) => {
-  // Prepare sidebar counts
+  // Prepare sidebar counts (using original torrents for counts)
   const counts = {
     all: torrents.length,
     downloading: torrents.filter(t => t.state === 'downloading').length,
@@ -40,29 +40,30 @@ export const DashboardNew = ({ torrents, systemInfo }: DashboardProps) => {
 
   // Stats for grid
   const stats = {
-    downloadSpeed: systemInfo.downloadRate,
-    uploadSpeed: systemInfo.uploadRate,
-    diskFree: systemInfo.diskSpace.total - systemInfo.diskSpace.used,
-    diskTotal: systemInfo.diskSpace.total,
-    activePeers: systemInfo.activePeers,
+    downloadSpeed: systemInfo.downloadRate || 0,
+    uploadSpeed: systemInfo.uploadRate || 0,
+    diskFree: (systemInfo.diskSpace?.total || 0) - (systemInfo.diskSpace?.used || 0),
+    diskTotal: systemInfo.diskSpace?.total || 0,
+    activePeers: systemInfo.activePeers || 0,
     totalTorrents: torrents.length
   }
 
   return (
     <html lang="en" class="dark">
       <head>
+        <title>rTorrent Web UI</title>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
         <meta http-equiv="Pragma" content="no-cache" />
         <meta http-equiv="Expires" content="0" />
-        <title>rTorrent Web UI</title>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" />
         <script src="https://cdn.tailwindcss.com"></script>
-        <script dangerouslySetInnerHTML={{ __html: `
+        <script dangerouslySetInnerHTML={{
+          __html: `
           tailwind.config = {
             darkMode: 'class',
             theme: {
@@ -82,7 +83,8 @@ export const DashboardNew = ({ torrents, systemInfo }: DashboardProps) => {
             }
           }
         `}} />
-        <style dangerouslySetInnerHTML={{ __html: `
+        <style dangerouslySetInnerHTML={{
+          __html: `
           body { font-family: 'Inter', system-ui, sans-serif; }
           .drawer-shadow { box-shadow: -20px 0 60px rgba(0,0,0,0.5); }
           @keyframes pulse-soft { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
@@ -97,56 +99,59 @@ export const DashboardNew = ({ torrents, systemInfo }: DashboardProps) => {
       <body class="bg-background-dark text-slate-100 antialiased overflow-hidden">
         <div class="flex h-screen" id="app-container">
           {/* Sidebar */}
-          <DashboardSidebar 
-            labels={labels} 
-            labelCounts={labelCounts} 
-            counts={counts} 
-            filter="all" 
+          <DashboardSidebar
+            labels={labels}
+            labelCounts={labelCounts}
+            counts={counts}
+            filter="all"
+            systemInfo={systemInfo}
           />
-          
+
           {/* Main Content */}
           <main class="flex-1 flex flex-col overflow-hidden">
             {/* Header */}
             <DashboardHeader />
-            
+
             {/* Content Area */}
             <div class="flex-1 p-8 overflow-y-auto scrollbar-thin">
               {/* Stats Grid */}
               <StatsGrid stats={stats} />
-              
+
               {/* View Tabs */}
               <ViewTabs />
-              
+
               {/* Torrent Table */}
               <TorrentTable torrents={torrents} />
             </div>
           </main>
         </div>
-        
+
         {/* Detail Drawer */}
         <DetailDrawer />
         <DrawerBackdrop />
-        
+
         {/* Context Menu */}
         <ContextMenu />
         <PrioritySubmenu />
-        
+
         {/* Modals */}
         <LabelModal />
         <DeleteModal />
         <AddTorrentModal />
-        
+
         {/* Hidden Data */}
-        <script 
-          id="initial-data" 
-          type="application/json" 
-          dangerouslySetInnerHTML={{ __html: JSON.stringify({
-            torrents,
-            systemInfo,
-            labels
-          })}} 
+        <script
+          id="initial-data"
+          type="application/json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              torrents,
+              systemInfo,
+              labels
+            })
+          }}
         />
-        
+
         {/* Dashboard Scripts */}
         <script dangerouslySetInnerHTML={{ __html: getAllDashboardScripts() }} />
       </body>

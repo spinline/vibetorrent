@@ -1,0 +1,10 @@
+node_modules
+dist
+docker/data
+docker/downloads
+docker/config/.session
+docker/config/.local
+.git
+.github
+.DS_Store
+*.log

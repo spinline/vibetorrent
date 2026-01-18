@@ -4,4 +4,7 @@ node_modules/
 docker/data/
 docker/downloads/
 *.meta
+docker/config/.session/
+docker/config/.local/
+dist/
 bun.lockb

@@ -9,6 +9,46 @@ export const getAllDashboardScripts = (): string => {
     let initAttempts = 0;
     const MAX_ATTEMPTS = 10;
     
+    // Load initial data from SSR immediately to prevent flash of loading/default values
+    var initialData = null;
+    try {
+      var dataEl = document.getElementById('initial-data');
+      if (dataEl) {
+        initialData = JSON.parse(dataEl.textContent || '{}');
+      }
+    } catch (e) {
+      console.warn('Failed to parse initial data:', e);
+    }
+    
+    // Build torrents map from initial data
+    var initialTorrents = {};
+    if (initialData && initialData.torrents) {
+      initialData.torrents.forEach(function(t) {
+        initialTorrents[t.hash] = t;
+      });
+    }
+    
+    // Build initial systemInfo from initial data
+    var initialSystemInfo = {
+      downloadRate: initialData?.systemInfo?.downloadRate || 0,
+      uploadRate: initialData?.systemInfo?.uploadRate || 0,
+      diskSpace: initialData?.systemInfo?.diskSpace || { used: 0, total: 0 },
+      activePeers: initialData?.systemInfo?.activePeers || 0,
+      hostname: initialData?.systemInfo?.hostname || 'localhost',
+      clientVersion: initialData?.systemInfo?.clientVersion || ''
+    };
+    
+    // Shared state and functions across dashboard scripts
+    window.gState = { 
+      torrents: initialTorrents, 
+      systemInfo: initialSystemInfo
+    };
+    var state = window.gState;
+    
+    var updateUI, fetchTorrents, openDrawer, closeDrawer, showToast;
+    var currentFilter, searchQuery, sortColumn, sortDirection;
+    var drawer, drawerBackdrop, torrentTableBody, ctxMenu;
+    
     function initDashboard() {
       // Check if critical elements exist
       const criticalElements = [
@@ -27,30 +67,14 @@ export const getAllDashboardScripts = (): string => {
       }
       
       try {
-        // Dashboard scripts
+        // Dashboard, Context Menu, and Add Modal scripts
         ${getDashboardScripts()}
-      } catch (e) {
-        console.error('Dashboard scripts error:', e.message, e.stack);
-        return;
-      }
-      
-      try {
-        // Context menu scripts
         ${getContextMenuScripts()}
-      } catch (e) {
-        console.error('Context menu scripts error:', e.message, e.stack);
-        return;
-      }
-      
-      try {
-        // Add modal scripts
         ${getAddModalScripts()}
+        console.log('Dashboard initialized successfully');
       } catch (e) {
-        console.error('Add modal scripts error:', e.message, e.stack);
-        return;
+        console.error('Dashboard initialization error:', e.message, e.stack);
       }
-      
-      console.log('Dashboard initialized successfully');
     }
     
     // Start initialization

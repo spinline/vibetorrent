@@ -9,7 +9,7 @@ export const formatBytes = (bytes: number, decimals = 2): string => {
 }
 
 export const formatBytesShort = (bytes: number): { value: string; unit: string } => {
-  if (bytes === 0) return { value: '0', unit: 'B' }
+  if (!bytes || bytes === 0 || !isFinite(bytes)) return { value: '0', unit: 'B' }
   const k = 1024
   const sizes = ['B', 'KB', 'MB', 'GB', 'TB']
   const i = Math.floor(Math.log(bytes) / Math.log(k))

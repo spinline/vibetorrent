@@ -1,20 +1,7 @@
 // Generate the dashboard client-side script
 export const getDashboardScripts = (): string => {
   return `
-    // State will be populated via SSE/API
-    let state = {
-      torrents: {},
-      systemInfo: {
-        downloadRate: 0,
-        uploadRate: 0,
-        diskSpace: { used: 0, total: 0 },
-        activePeers: 0,
-        hostname: 'localhost',
-        clientVersion: 'N/A',
-        libraryVersion: 'N/A'
-      }
-    };
-    
+    // State is already initialized in index.ts
     const formatBytes = (bytes, decimals = 2) => {
       if (bytes === 0) return '0 B';
       const k = 1024;
@@ -73,7 +60,7 @@ export const getDashboardScripts = (): string => {
     };
     
     // Toast notification system
-    function showToast(message, type = 'info') {
+    showToast = function(message, type = 'info') {
       let container = document.getElementById('toast-container');
       if (!container) {
         container = document.createElement('div');
@@ -100,8 +87,8 @@ export const getDashboardScripts = (): string => {
     }
     
     // ========== DRAWER FUNCTIONALITY ==========
-    const drawer = document.getElementById('detail-drawer');
-    const drawerBackdrop = document.getElementById('drawer-backdrop');
+    drawer = document.getElementById('detail-drawer');
+    drawerBackdrop = document.getElementById('drawer-backdrop');
     const fabContainer = document.getElementById('fab-container');
     let currentDrawerHash = null;
     let drawerData = null;
@@ -113,7 +100,7 @@ export const getDashboardScripts = (): string => {
     let filesSortKey = 'name';
     let filesSortDesc = false;
     
-    function openDrawer(hash) {
+    openDrawer = function(hash) {
       currentDrawerHash = hash;
       filesCurrentPage = 1;
       filesFilterQuery = '';
@@ -133,7 +120,7 @@ export const getDashboardScripts = (): string => {
       loadDrawerData(hash);
     }
     
-    function closeDrawer() {
+    closeDrawer = function() {
       currentDrawerHash = null;
       drawerData = null;
       drawer.classList.add('translate-x-full');
@@ -584,8 +571,8 @@ export const getDashboardScripts = (): string => {
     });
     
     function updateDrawerIfOpen() {
-      if (currentDrawerHash && state.torrents[currentDrawerHash]) {
-        const t = state.torrents[currentDrawerHash];
+      if (currentDrawerHash && window.gState.torrents[currentDrawerHash]) {
+        const t = window.gState.torrents[currentDrawerHash];
         const progress = t.size > 0 ? Math.min(100, (t.completed / t.size) * 100) : 0;
         document.getElementById('drawer-progress-ring').setAttribute('stroke-dasharray', progress + ', 100');
         document.getElementById('drawer-progress-text').innerHTML = progress.toFixed(1) + '<span class="text-lg text-primary">%</span>';
@@ -602,13 +589,23 @@ export const getDashboardScripts = (): string => {
     }
     // ========== END DRAWER FUNCTIONALITY ==========
     
-    let currentFilter = 'all';
-    let searchQuery = '';
-    let sortColumn = 'name';
-    let sortDirection = 'asc';
+    currentFilter = 'all';
+    searchQuery = '';
+    
+    // Load sort preferences from cookies (synced with server)
+    var savedSort = null;
+    try {
+      const match = document.cookie.match(/(?:^|; )rtorrent_sort=([^;]*)/);
+      if (match) {
+        savedSort = JSON.parse(decodeURIComponent(match[1]));
+      }
+    } catch (e) {}
+    
+    sortColumn = savedSort?.column || 'name';
+    sortDirection = savedSort?.direction || 'asc';
     
     function getFilteredTorrents() {
-      let torrents = Object.values(state.torrents);
+      let torrents = Object.values(window.gState.torrents);
       
       if (currentFilter === 'downloading') {
         torrents = torrents.filter(t => t.state === 'downloading');
@@ -687,10 +684,10 @@ export const getDashboardScripts = (): string => {
       });
     }
     
-    function updateUI() {
-      const allTorrents = Object.values(state.torrents);
+    updateUI = function() {
+      const allTorrents = Object.values(window.gState.torrents);
       const torrents = getFilteredTorrents();
-      const systemInfo = state.systemInfo;
+      const systemInfo = window.gState.systemInfo;
       
       const dlSpeed = formatSpeed(systemInfo.downloadRate || 0);
       const ulSpeed = formatSpeed(systemInfo.uploadRate || 0);
@@ -772,14 +769,6 @@ export const getDashboardScripts = (): string => {
         '</tr>';
       }).join('');
       
-      tbody.querySelectorAll('tr[data-hash]').forEach(row => {
-        row.addEventListener('click', function(e) {
-          if (e.button === 2) return;
-          const hash = this.dataset.hash;
-          if (hash) openDrawer(hash);
-        });
-      });
-      
       updateDrawerIfOpen();
     }
     
@@ -789,46 +778,46 @@ export const getDashboardScripts = (): string => {
         const hash = parts[1];
         if (parts.length === 2) {
           if (value === null) {
-            delete state.torrents[hash];
+            delete window.gState.torrents[hash];
           } else {
-            state.torrents[hash] = value;
+            window.gState.torrents[hash] = value;
           }
         } else {
           const prop = parts[2];
-          if (state.torrents[hash]) {
-            state.torrents[hash][prop] = value;
+          if (window.gState.torrents[hash]) {
+            window.gState.torrents[hash][prop] = value;
           }
         }
       } else if (parts[0] === 'systemInfo') {
         if (parts.length === 1) {
-          state.systemInfo = value;
+          window.gState.systemInfo = value;
         } else if (parts[1] === 'diskSpace') {
           if (parts.length === 2) {
-            state.systemInfo.diskSpace = value;
+            window.gState.systemInfo.diskSpace = value;
           } else {
-            state.systemInfo.diskSpace[parts[2]] = value;
+            window.gState.systemInfo.diskSpace[parts[2]] = value;
           }
         } else {
-          state.systemInfo[parts[1]] = value;
+          window.gState.systemInfo[parts[1]] = value;
         }
       } else if (parts[0] === 'stats') {
         if (parts.length === 1) {
-          state.systemInfo.downloadRate = value.downloadSpeed || 0;
-          state.systemInfo.uploadRate = value.uploadSpeed || 0;
+          window.gState.systemInfo.downloadRate = value.downloadSpeed || 0;
+          window.gState.systemInfo.uploadRate = value.uploadSpeed || 0;
         } else {
-          if (parts[1] === 'downloadSpeed') state.systemInfo.downloadRate = value;
-          if (parts[1] === 'uploadSpeed') state.systemInfo.uploadRate = value;
+          if (parts[1] === 'downloadSpeed') window.gState.systemInfo.downloadRate = value;
+          if (parts[1] === 'uploadSpeed') window.gState.systemInfo.uploadRate = value;
         }
       }
     }
     
-    async function fetchTorrents() {
+    fetchTorrents = async function() {
       try {
         const response = await fetch('/api/torrents');
         const torrents = await response.json();
-        state.torrents = {};
+        window.gState.torrents = {};
         torrents.forEach(t => {
-          state.torrents[t.hash] = t;
+          window.gState.torrents[t.hash] = t;
         });
         updateUI();
       } catch (err) {
@@ -851,12 +840,12 @@ export const getDashboardScripts = (): string => {
       eventSource.addEventListener('init', function(e) {
         try {
           const data = JSON.parse(e.data);
-          state.torrents = data.torrents || {};
+          window.gState.torrents = data.torrents || {};
           if (data.systemInfo) {
-            state.systemInfo = data.systemInfo;
+            window.gState.systemInfo = data.systemInfo;
           } else if (data.stats) {
-            state.systemInfo.downloadRate = data.stats.downloadSpeed || 0;
-            state.systemInfo.uploadRate = data.stats.uploadSpeed || 0;
+            window.gState.systemInfo.downloadRate = data.stats.downloadSpeed || 0;
+            window.gState.systemInfo.uploadRate = data.stats.uploadSpeed || 0;
           }
           isConnected = true;
           updateUI();
@@ -928,15 +917,13 @@ export const getDashboardScripts = (): string => {
     // Event listeners
     
     // Torrent row click to open drawer
-    const torrentTableBody = document.getElementById('torrent-table-body');
-    if (torrentTableBody) {
-      torrentTableBody.addEventListener('click', function(e) {
-        const row = e.target.closest('tr[data-hash]');
-        if (row) {
-          openDrawer(row.dataset.hash);
-        }
-      });
-    }
+    document.addEventListener('click', function(e) {
+      const row = e.target.closest('tr[data-hash]');
+      if (row) {
+        if (e.button === 2) return;
+        openDrawer(row.dataset.hash);
+      }
+    });
     
     // Drawer backdrop click to close
     if (drawerBackdrop) {
@@ -982,6 +969,13 @@ export const getDashboardScripts = (): string => {
           sortColumn = col;
           sortDirection = ['size', 'progress', 'downloadRate', 'uploadRate'].includes(col) ? 'desc' : 'asc';
         }
+        // Save sort preference to cookies (1 year expiry)
+        try {
+          const val = encodeURIComponent(JSON.stringify({ column: sortColumn, direction: sortDirection }));
+          const d = new Date();
+          d.setTime(d.getTime() + (365*24*60*60*1000));
+          document.cookie = "rtorrent_sort=" + val + "; expires=" + d.toUTCString() + "; path=/; SameSite=Lax";
+        } catch (e) {}
         updateSortIcons();
         updateUI();
       });
@@ -1011,6 +1005,10 @@ export const getDashboardScripts = (): string => {
         renderFilesList();
       });
     }
+    
+    // Apply saved sort preferences immediately
+    updateSortIcons();
+    updateUI();
     
     connect();
   `

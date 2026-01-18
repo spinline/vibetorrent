@@ -186,11 +186,11 @@ export const getAddModalScripts = (): string => {
     
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape') {
-        if (!drawer.classList.contains('drawer-hidden')) {
+        if (drawer && !drawer.classList.contains('translate-x-full')) {
           closeDrawer();
           return;
         }
-        if (!modal.classList.contains('hidden')) {
+        if (modal && !modal.classList.contains('hidden')) {
           closeModal();
         }
       }

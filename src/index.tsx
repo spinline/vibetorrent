@@ -1,12 +1,13 @@
 import { Hono } from 'hono'
 import { serveStatic } from 'hono/bun'
+import { getCookie } from 'hono/cookie'
 import { DashboardNew as Dashboard } from './views/DashboardNew'
 import { Settings } from './views/SettingsNew'
 import { apiRoutes } from './routes/api'
 import { RTorrentService } from './services/rtorrent-service'
 
 const app = new Hono()
-const rtorrent = new RTorrentService('localhost', 8000)
+const rtorrent = new RTorrentService(process.env.RTORRENT_HOST || 'localhost', parseInt(process.env.RTORRENT_PORT || '8000'))
 
 // Static files
 app.use('/public/*', serveStatic({ root: './' }))
@@ -29,14 +30,85 @@ app.get('/', async (c) => {
   c.header('Cache-Control', 'no-cache, no-store, must-revalidate')
   c.header('Pragma', 'no-cache')
   c.header('Expires', '0')
-  
+
   try {
     const [torrents, systemInfo] = await Promise.all([
       rtorrent.getTorrents(),
       rtorrent.getSystemInfo()
     ])
-    
-    return c.html(<Dashboard torrents={torrents} systemInfo={systemInfo} />)
+
+    // Server-side sorting based on cookie
+    const sortCookie = getCookie(c, 'rtorrent_sort')
+    let sortedTorrents = [...torrents]
+
+    if (sortCookie) {
+      try {
+        let sortParams
+        try {
+          // First try parsing directly (in case Hono decoded it)
+          sortParams = JSON.parse(sortCookie)
+        } catch (e) {
+          // If that fails, try decoding first (client uses encodeURIComponent)
+          sortParams = JSON.parse(decodeURIComponent(sortCookie))
+        }
+
+        const { column, direction } = sortParams
+
+        sortedTorrents.sort((a: any, b: any) => {
+          let valA, valB
+
+          switch (column) {
+            case 'name':
+              valA = a.name.toLowerCase()
+              valB = b.name.toLowerCase()
+              break
+            case 'size':
+              valA = a.size
+              valB = b.size
+              break
+            case 'progress':
+              valA = a.size > 0 ? a.completed / a.size : 0
+              valB = b.size > 0 ? b.completed / b.size : 0
+              break
+            case 'state':
+              const stateOrder: Record<string, number> = { downloading: 0, seeding: 1, paused: 2, stopped: 3 }
+              valA = stateOrder[a.state] ?? 4
+              valB = stateOrder[b.state] ?? 4
+              break
+            case 'downloadRate':
+              valA = a.downloadRate || 0
+              valB = b.downloadRate || 0
+              break
+            case 'uploadRate':
+              valA = a.uploadRate || 0
+              valB = b.uploadRate || 0
+              break
+            case 'eta':
+              valA = a.eta || Infinity
+              valB = b.eta || Infinity
+              break
+            default:
+              valA = a.name.toLowerCase()
+              valB = b.name.toLowerCase()
+          }
+
+          if (valA < valB) return direction === 'asc' ? -1 : 1
+          if (valA > valB) return direction === 'asc' ? 1 : -1
+          return 0
+        })
+
+        console.log(`Sorted by ${column} ${direction} (Cookie: ${sortCookie})`)
+      } catch (e) {
+        console.error('Failed to parse sort cookie:', e)
+        // Fallback to name asc if cookie is invalid
+        sortedTorrents.sort((a, b) => a.name.localeCompare(b.name))
+      }
+    } else {
+      // Default sort (Name ASC)
+      sortedTorrents.sort((a, b) => a.name.localeCompare(b.name))
+    }
+
+    return c.html(<Dashboard torrents={sortedTorrents} systemInfo={systemInfo} />)
   } catch (error) {
     console.error('Error loading dashboard:', error)
     const defaultSystemInfo = {
@@ -78,7 +150,7 @@ app.get('/torrent/:hash', async (c) => {
       rtorrent.getTorrents(),
       rtorrent.getSystemInfo()
     ])
-    
+
     return c.html(<Dashboard torrents={torrents} systemInfo={systemInfo} />)
   } catch (error) {
     const defaultSystemInfo = {
@@ -94,7 +166,7 @@ app.get('/torrent/:hash', async (c) => {
   }
 })
 
-const port = 3000
+const port = parseInt(process.env.PORT || '3000')
 console.log(`🚀 rTorrent Web UI running at http://localhost:${port}`)
 console.log(`📡 SSE endpoint available at /api/events`)
 

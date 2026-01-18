@@ -4,14 +4,16 @@ export const getContextMenuScripts = (): string => {
     // ============================================
     // Context Menu (Right-click)
     // ============================================
-    const ctxMenu = document.getElementById('context-menu');
+    ctxMenu = document.getElementById('context-menu');
     let ctxHash = null;
     let ctxTorrent = null;
     
-    function showContextMenu(e, hash) {
+    const showContextMenu = function(e, hash) {
+      console.log('showContextMenu called', hash);
       e.preventDefault();
       ctxHash = hash;
-      ctxTorrent = state.torrents[hash];
+      ctxTorrent = window.gState.torrents[hash];
+      console.log('ctxTorrent', ctxTorrent);
       
       if (!ctxTorrent) return;
       
@@ -80,7 +82,7 @@ export const getContextMenuScripts = (): string => {
       if (e.key === 'Escape') hideContextMenu();
     });
     
-    document.getElementById('torrent-table-body').addEventListener('contextmenu', function(e) {
+    document.addEventListener('contextmenu', function(e) {
       const row = e.target.closest('tr[data-hash]');
       if (row) {
         showContextMenu(e, row.dataset.hash);
@@ -91,7 +93,7 @@ export const getContextMenuScripts = (): string => {
       if (!ctxHash) return;
       
       const hash = ctxHash;
-      const torrent = state.torrents[hash];
+      const torrent = window.gState.torrents[hash];
       if (!torrent) return;
       
       const previousState = { ...torrent };
@@ -174,8 +176,8 @@ export const getContextMenuScripts = (): string => {
         
       } catch (err) {
         console.error('Action failed:', err);
-        if (state.torrents[hash]) {
-          Object.assign(state.torrents[hash], previousState);
+        if (window.gState.torrents[hash]) {
+          Object.assign(window.gState.torrents[hash], previousState);
           updateUI();
         }
         showToast('Error: ' + err.message, 'error');
@@ -325,8 +327,8 @@ export const getContextMenuScripts = (): string => {
       const hash = labelHash;
       const newLabel = labelInput.value;
       
-      if (state.torrents[hash]) {
-        state.torrents[hash].label = newLabel;
+      if (window.gState.torrents[hash]) {
+        window.gState.torrents[hash].label = newLabel;
         updateUI();
       }
       closeLabelModal();
@@ -387,14 +389,14 @@ export const getContextMenuScripts = (): string => {
       if (!deleteHash) return;
       
       const hashToDelete = deleteHash;
-      const removedTorrent = state.torrents[hashToDelete];
+      const removedTorrent = window.gState.torrents[hashToDelete];
       const torrentName = removedTorrent?.name || 'Unknown';
       const shouldDeleteFiles = deleteFiles;
       
       closeDeleteModal();
       
       if (removedTorrent) {
-        delete state.torrents[hashToDelete];
+        delete window.gState.torrents[hashToDelete];
         updateUI();
       }
       
@@ -406,7 +408,7 @@ export const getContextMenuScripts = (): string => {
         showToast('Removed "' + torrentName.substring(0, 30) + (torrentName.length > 30 ? '...' : '') + '"', 'success');
       } catch (err) {
         if (removedTorrent) {
-          state.torrents[hashToDelete] = removedTorrent;
+          window.gState.torrents[hashToDelete] = removedTorrent;
           updateUI();
         }
         showToast('Error: ' + err.message, 'error');
