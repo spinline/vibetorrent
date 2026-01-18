@@ -7,7 +7,13 @@ import { apiRoutes } from './routes/api'
 import { RTorrentService } from './services/rtorrent-service'
 
 const app = new Hono()
-const rtorrent = new RTorrentService(process.env.RTORRENT_HOST || 'localhost', parseInt(process.env.RTORRENT_PORT || '8000'))
+const host = process.env.RTORRENT_HOST || 'localhost'
+const rtorrentPort = parseInt(process.env.RTORRENT_PORT || '8000')
+
+console.log(`[DEBUG] Initializing RTorrentService with Host: ${host}, Port: ${rtorrentPort}`)
+console.log(`[DEBUG] Environment: RTORRENT_HOST=${process.env.RTORRENT_HOST}, RTORRENT_PORT=${process.env.RTORRENT_PORT}`)
+
+const rtorrent = new RTorrentService(host, rtorrentPort)
 
 // Static files
 app.use('/public/*', serveStatic({ root: './' }))

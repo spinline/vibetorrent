@@ -14,7 +14,7 @@ export class SCGIClient {
     return new Promise((resolve, reject) => {
       let responseData = ''
       let resolved = false
-      
+
       const timeout = setTimeout(() => {
         if (!resolved) {
           resolved = true
@@ -28,7 +28,7 @@ export class SCGIClient {
         socket: {
           data: (socket, data) => {
             responseData += new TextDecoder().decode(data)
-            
+
             // Check if we have a complete response
             if (responseData.includes('</methodResponse>')) {
               if (!resolved) {
@@ -70,7 +70,7 @@ export class SCGIClient {
             if (!resolved) {
               resolved = true
               clearTimeout(timeout)
-              reject(new Error(`Connection failed: ${error}`))
+              reject(new Error(`Connection failed to ${this.host}:${this.port}: ${error}`))
             }
           },
         },
@@ -88,13 +88,13 @@ export class SCGIClient {
     let xml = '<?xml version="1.0"?>\n<methodCall>\n'
     xml += `  <methodName>${method}</methodName>\n`
     xml += '  <params>\n'
-    
+
     for (const param of params) {
       xml += '    <param>\n'
       xml += `      ${this.valueToXML(param)}\n`
       xml += '    </param>\n'
     }
-    
+
     xml += '  </params>\n</methodCall>'
     return xml
   }
@@ -134,11 +134,11 @@ export class SCGIClient {
   private buildSCGIMessage(body: string): Uint8Array {
     const bodyBytes = new TextEncoder().encode(body)
     const contentLength = bodyBytes.length
-    
+
     // SCGI headers as null-terminated key-value pairs
     const headers = `CONTENT_LENGTH\x00${contentLength}\x00SCGI\x001\x00`
     const headerLength = headers.length
-    
+
     // Netstring format: length:content,
     const message = `${headerLength}:${headers},${body}`
     return new TextEncoder().encode(message)
@@ -149,7 +149,7 @@ export class SCGIClient {
     if (xmlStart === -1) {
       throw new Error('No XML found in response')
     }
-    
+
     const xml = response.substring(xmlStart)
     return this.parseXMLValue(xml) as T
   }
@@ -170,7 +170,7 @@ export class SCGIClient {
     const paramContent = xml.substring(paramStart, paramEnd + 8)
     const valueStart = paramContent.indexOf('<value>')
     const valueEnd = paramContent.lastIndexOf('</value>')
-    
+
     if (valueStart === -1 || valueEnd === -1) {
       return null
     }
@@ -213,14 +213,14 @@ export class SCGIClient {
 
   private parseArray(content: string): any[] {
     const values: any[] = []
-    
+
     // Find <data> content
     const dataStart = content.indexOf('<data>')
     const dataEnd = content.lastIndexOf('</data>')
     if (dataStart === -1 || dataEnd === -1) return values
 
     const dataContent = content.substring(dataStart + 6, dataEnd)
-    
+
     // Parse each <value> at the top level
     let pos = 0
     while (pos < dataContent.length) {
