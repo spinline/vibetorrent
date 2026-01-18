@@ -50,8 +50,15 @@ export const baseStyles = `
   .touch-callout-none { -webkit-touch-callout: none !important; }
   .no-scrollbar::-webkit-scrollbar { display: none; }
   .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-  .safe-top { padding-top: env(safe-area-inset-top); }
-  .safe-h-16 { height: calc(4rem + env(safe-area-inset-top)); }
+  .safe-top { 
+    padding-top: env(safe-area-inset-top, 0px);
+    margin-top: 0;
+  }
+  /* Specific class for adding to existing p-6 (1.5rem) padding */
+  .safe-pt-6 { 
+    padding-top: calc(1.5rem + env(safe-area-inset-top, 0px)); 
+  }
+  .safe-h-16 { height: calc(4rem + env(safe-area-inset-top, 0px)); }
 `
 
 export const Layout = ({ title, children, scripts = '', styles = '' }: LayoutProps) => {

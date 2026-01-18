@@ -31,7 +31,7 @@ export const DashboardSidebar = ({ labels, labelCounts, counts, filter, systemIn
       <div id="sidebar-backdrop" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 hidden md:hidden transition-opacity opacity-0"></div>
       <aside id="dashboard-sidebar" class="fixed inset-y-0 left-0 z-50 w-64 transform -translate-x-full transition-transform duration-300 md:translate-x-0 md:static md:inset-auto flex flex-col border-r border-slate-200 dark:border-slate-800 h-[100dvh] bg-background-light dark:bg-background-dark shadow-2xl md:shadow-none">
         {/* Logo */}
-        <div class="p-6 flex items-center gap-3 safe-top">
+        <div class="px-6 pb-6 safe-pt-6 flex items-center gap-3">
           <div class="size-10 bg-primary rounded-lg flex items-center justify-center text-white shadow-lg shadow-primary/20">
             <span class="material-symbols-outlined text-2xl">box_edit</span>
           </div>
