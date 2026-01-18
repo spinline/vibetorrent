@@ -18,11 +18,11 @@ services:
     build: .
     container_name: rtorrent-web-ui
     ports:
-      - "3000:3000"
+      - "3001:3001"
     environment:
       - RTORRENT_HOST=rtorrent
       - RTORRENT_PORT=8000
-      - PORT=3000
+      - PORT=3001
     depends_on:
       - rtorrent
     restart: unless-stopped
