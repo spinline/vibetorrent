@@ -42,11 +42,6 @@ export const baseStyles = `
     font-size: 20px;
     font-variation-settings: 'FILL' 0, 'wght' 500;
   }
-  .active-nav {
-    background-color: rgba(18, 161, 161, 0.15);
-    border-left: 3px solid #12a1a1;
-    color: #12a1a1 !important;
-  }
   ::-webkit-scrollbar { width: 6px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
