@@ -886,15 +886,44 @@ export const getDashboardScripts = (): string => {
     function setFilter(filter) {
       currentFilter = filter;
       
+      const inactiveClasses = ['hover:bg-slate-100', 'dark:hover:bg-surface-dark', 'text-slate-600', 'dark:text-slate-300'];
+      
+      const activeStyleMap = {
+        'all': ['bg-primary/10', 'text-primary'],
+        'downloading': ['bg-primary/10', 'text-primary'],
+        'seeding': ['bg-emerald-500/10', 'text-emerald-500'],
+        'paused': ['bg-orange-500/10', 'text-orange-500'],
+        'completed': ['bg-slate-500/10', 'text-slate-400']
+      };
+      const defaultActiveStyle = ['bg-primary/10', 'text-primary'];
+
+      // Reset all navigation items
       document.querySelectorAll('.nav-filter, #nav-all').forEach(el => {
-        el.classList.remove('active-nav', 'text-primary');
+        // Remove all possible active classes
+        el.classList.remove(
+          'bg-primary/10', 'text-primary',
+          'bg-emerald-500/10', 'text-emerald-500',
+          'bg-orange-500/10', 'text-orange-500',
+          'bg-slate-500/10', 'text-slate-400',
+          'active-nav'
+        );
+        
+        // Add inactive classes
+        el.classList.add(...inactiveClasses);
+        
+        // Clean up inner span if it was modified by previous versions of this script
         const textSpan = el.querySelector('.text-sm');
         if (textSpan) {
           textSpan.classList.remove('text-primary');
-          textSpan.classList.add('text-slate-600', 'dark:text-slate-300');
+          // We don't need to add text-slate-600 here as it inherits from parent, 
+          // but if it was added previously, we can leave it or remove it to rely on inheritance.
+          // Let's safe-remove explicitly added color classes if possible, but simplest is to do nothing 
+          // as long as we don't ADD specific colors.
+          textSpan.classList.remove('text-slate-600', 'dark:text-slate-300');
         }
       });
       
+      // Activate the target item
       let activeEl;
       if (filter === 'all') {
         activeEl = document.getElementById('nav-all');
@@ -903,12 +932,15 @@ export const getDashboardScripts = (): string => {
       }
       
       if (activeEl) {
-        activeEl.classList.add('active-nav', 'text-primary');
-        const textSpan = activeEl.querySelector('.text-sm');
-        if (textSpan) {
-          textSpan.classList.remove('text-slate-600', 'dark:text-slate-300');
-          textSpan.classList.add('text-primary');
-        }
+        // Remove inactive classes
+        activeEl.classList.remove(...inactiveClasses);
+        
+        // Determine active style
+        let styleKey = filter;
+        if (filter.startsWith('label:')) styleKey = 'default'; // labels use default primary
+        
+        const activeClasses = activeStyleMap[styleKey] || defaultActiveStyle;
+        activeEl.classList.add(...activeClasses);
       }
       
       updateUI();
