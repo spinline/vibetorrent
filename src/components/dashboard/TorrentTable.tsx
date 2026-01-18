@@ -11,22 +11,22 @@ export const TorrentTableHeader = () => (
       <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest sm:w-1/3 cursor-pointer hover:text-primary transition-colors select-none" data-sort="name">
         <div class="flex items-center gap-1">Name <span class="material-symbols-outlined text-xs sort-icon" data-col="name">unfold_more</span></div>
       </th>
-      <th class="hidden md:table-cell px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest cursor-pointer hover:text-primary transition-colors select-none" data-sort="size">
+      <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest cursor-pointer hover:text-primary transition-colors select-none" data-sort="size">
         <div class="flex items-center gap-1">Size <span class="material-symbols-outlined text-xs sort-icon" data-col="size">unfold_more</span></div>
       </th>
       <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest w-32 sm:w-48 cursor-pointer hover:text-primary transition-colors select-none" data-sort="progress">
         <div class="flex items-center gap-1">Progress <span class="material-symbols-outlined text-xs sort-icon" data-col="progress">unfold_more</span></div>
       </th>
-      <th class="hidden sm:table-cell px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest cursor-pointer hover:text-primary transition-colors select-none" data-sort="state">
+      <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest cursor-pointer hover:text-primary transition-colors select-none" data-sort="state">
         <div class="flex items-center gap-1">Status <span class="material-symbols-outlined text-xs sort-icon" data-col="state">unfold_more</span></div>
       </th>
-      <th class="hidden lg:table-cell px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest text-right cursor-pointer hover:text-primary transition-colors select-none whitespace-nowrap" data-sort="downloadRate">
+      <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest text-right cursor-pointer hover:text-primary transition-colors select-none whitespace-nowrap" data-sort="downloadRate">
         <div class="flex items-center justify-end gap-1">DL Speed <span class="material-symbols-outlined text-xs sort-icon" data-col="downloadRate">unfold_more</span></div>
       </th>
-      <th class="hidden lg:table-cell px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest text-right cursor-pointer hover:text-primary transition-colors select-none whitespace-nowrap" data-sort="uploadRate">
+      <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest text-right cursor-pointer hover:text-primary transition-colors select-none whitespace-nowrap" data-sort="uploadRate">
         <div class="flex items-center justify-end gap-1">UL Speed <span class="material-symbols-outlined text-xs sort-icon" data-col="uploadRate">unfold_more</span></div>
       </th>
-      <th class="hidden xl:table-cell px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest text-right cursor-pointer hover:text-primary transition-colors select-none" data-sort="eta">
+      <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest text-right cursor-pointer hover:text-primary transition-colors select-none" data-sort="eta">
         <div class="flex items-center justify-end gap-1">ETA <span class="material-symbols-outlined text-xs sort-icon" data-col="eta">unfold_more</span></div>
       </th>
       <th class="px-6 py-4 w-10"></th>
@@ -63,7 +63,7 @@ export const TorrentRow = ({ torrent }: { torrent: TorrentInfo }) => {
           </div>
         </div>
       </td>
-      <td class="hidden md:table-cell px-6 py-4 text-sm font-medium whitespace-nowrap">{formatBytes(torrent.size)}</td>
+      <td class="px-6 py-4 text-sm font-medium whitespace-nowrap">{formatBytes(torrent.size)}</td>
       <td class="px-6 py-4">
         <div class="flex items-center gap-3">
           <div class="flex-1 h-2 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden min-w-[60px]">
@@ -72,14 +72,14 @@ export const TorrentRow = ({ torrent }: { torrent: TorrentInfo }) => {
           <span class="text-xs font-bold w-10 sm:w-14 text-right">{progress}%</span>
         </div>
       </td>
-      <td class="hidden sm:table-cell px-6 py-4" dangerouslySetInnerHTML={{ __html: getStatusBadge(torrent.state) }}></td>
-      <td class={`hidden lg:table-cell px-6 py-4 text-sm font-${torrent.downloadRate > 0 ? 'bold' : 'medium'} text-right whitespace-nowrap ${torrent.downloadRate > 0 ? 'text-primary' : 'text-slate-400'}`}>
+      <td class="px-6 py-4" dangerouslySetInnerHTML={{ __html: getStatusBadge(torrent.state) }}></td>
+      <td class={`px-6 py-4 text-sm font-${torrent.downloadRate > 0 ? 'bold' : 'medium'} text-right whitespace-nowrap ${torrent.downloadRate > 0 ? 'text-primary' : 'text-slate-400'}`}>
         {torrent.downloadRate > 0 ? `${dlSpeed.value} ${dlSpeed.unit}` : `0 KB/s`}
       </td>
-      <td class={`hidden lg:table-cell px-6 py-4 text-sm font-${torrent.uploadRate > 0 ? 'bold' : 'medium'} text-right whitespace-nowrap ${torrent.uploadRate > 0 ? 'text-emerald-500' : 'text-slate-400'}`}>
+      <td class={`px-6 py-4 text-sm font-${torrent.uploadRate > 0 ? 'bold' : 'medium'} text-right whitespace-nowrap ${torrent.uploadRate > 0 ? 'text-emerald-500' : 'text-slate-400'}`}>
         {torrent.uploadRate > 0 ? `${ulSpeed.value} ${ulSpeed.unit}` : `0 KB/s`}
       </td>
-      <td class="hidden xl:table-cell px-6 py-4 text-sm font-medium text-right text-slate-500 whitespace-nowrap">
+      <td class="px-6 py-4 text-sm font-medium text-right text-slate-500 whitespace-nowrap">
         {progress === 100 ? 'Done' : formatETA(torrent.eta)}
       </td>
       <td class="px-4 py-4 text-right">
