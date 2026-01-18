@@ -89,14 +89,9 @@ export const DashboardNew = ({ torrents, systemInfo }: DashboardProps) => {
           .drawer-shadow { box-shadow: -20px 0 60px rgba(0,0,0,0.5); }
           @keyframes pulse-soft { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
           .animate-pulse-soft { animation: pulse-soft 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
-          .scrollbar-thin::-webkit-scrollbar { width: 6px; }
-          .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
-          .scrollbar-thin::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
-          .scrollbar-thin::-webkit-scrollbar-thumb:hover { background: #475569; }
           .material-symbols-outlined { font-size: 20px; font-variation-settings: 'FILL' 0, 'wght' 500; }
           .touch-callout-none { -webkit-touch-callout: none !important; -webkit-user-select: none !important; user-select: none !important; }
           #torrent-table-body tr { -webkit-touch-callout: none !important; -webkit-user-select: none !important; user-select: none !important; }
-          #torrent-table-body * { -pointer-events: auto; }
         `}} />
       </head>
       <body class="bg-background-dark text-slate-100 antialiased overflow-hidden">

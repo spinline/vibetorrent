@@ -42,11 +42,13 @@ export const baseStyles = `
     font-size: 20px;
     font-variation-settings: 'FILL' 0, 'wght' 500;
   }
-  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
   ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
-  ::-webkit-scrollbar-thumb:hover { background: #475569; }
+  ::-webkit-scrollbar-thumb { background: rgba(71, 85, 105, 0.2); border-radius: 10px; transition: background 0.2s; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(71, 85, 105, 0.5); }
   .touch-callout-none { -webkit-touch-callout: none !important; }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 `
 
 export const Layout = ({ title, children, scripts = '', styles = '' }: LayoutProps) => {
