@@ -8,8 +8,11 @@ interface PageHeaderProps {
 }
 
 export const PageHeader = ({ title, badge, children }: PageHeaderProps) => (
-  <header class="h-16 border-b border-slate-200 dark:border-slate-800 bg-background-light dark:bg-background-dark flex items-center justify-between px-8 shrink-0">
+  <header class="h-16 border-b border-slate-200 dark:border-slate-800 bg-background-light dark:bg-background-dark flex items-center justify-between px-8 shrink-0 relative z-30">
     <div class="flex items-center gap-4">
+      <button id="mobile-menu-toggle" class="md:hidden text-slate-500 hover:text-white transition-colors relative z-50 p-2">
+        <span class="material-symbols-outlined">menu</span>
+      </button>
       <h2 class="text-xl font-bold" id="header-title">{title}</h2>
       {badge && (
         <span class="px-2 py-0.5 bg-slate-200 dark:bg-slate-700 text-xs font-bold rounded uppercase text-slate-500 tracking-wider">

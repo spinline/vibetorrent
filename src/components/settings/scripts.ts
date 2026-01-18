@@ -37,6 +37,37 @@ export const settingsScripts = `
     var header = document.getElementById('header-title');
     if (header) header.textContent = titles[tabId] || 'Settings';
   }
+
+  // Mobile Menu Toggle Logic
+  document.addEventListener('click', function(e) {
+    const toggleBtn = e.target.closest('#mobile-menu-toggle');
+    const sidebar = document.getElementById('settings-sidebar');
+    const backdrop = document.getElementById('settings-sidebar-backdrop');
+    
+    if (toggleBtn) {
+      e.preventDefault();
+      if (sidebar && backdrop) {
+        const isClosed = sidebar.classList.contains('-translate-x-full');
+        if (isClosed) {
+          sidebar.classList.remove('-translate-x-full');
+          backdrop.classList.remove('hidden');
+          requestAnimationFrame(() => backdrop.classList.remove('opacity-0'));
+        } else {
+          sidebar.classList.add('-translate-x-full');
+          backdrop.classList.add('opacity-0');
+          setTimeout(() => backdrop.classList.add('hidden'), 300);
+        }
+      }
+      return;
+    }
+    
+    const isBackdrop = e.target.id === 'settings-sidebar-backdrop';
+    if (isBackdrop && sidebar) {
+      sidebar.classList.add('-translate-x-full');
+      e.target.classList.add('opacity-0');
+      setTimeout(() => e.target.classList.add('hidden'), 300);
+    }
+  });
 `
 
 // Settings page additional styles

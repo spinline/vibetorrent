@@ -62,7 +62,7 @@ export const Layout = ({ title, children, scripts = '', styles = '' }: LayoutPro
         <style dangerouslySetInnerHTML={{ __html: baseStyles + styles }} />
         {scripts && <script dangerouslySetInnerHTML={{ __html: scripts }} />}
       </head>
-      <body class="bg-background-dark text-slate-100 antialiased overflow-hidden min-h-screen flex">
+      <body class="bg-background-dark text-slate-100 antialiased overflow-hidden h-[100dvh] flex">
         {children}
       </body>
     </html>
