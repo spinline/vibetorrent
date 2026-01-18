@@ -1,6 +1,6 @@
 // Detail Drawer component for viewing torrent details
 export const DetailDrawer = () => (
-  <div id="detail-drawer" class="fixed top-0 right-0 bottom-0 w-[600px] bg-surface-dark border-l border-slate-800 flex flex-col drawer-shadow z-50 transition-transform duration-300 ease-in-out translate-x-full">
+  <div id="detail-drawer" class="fixed top-0 right-0 bottom-0 w-[648px] bg-surface-dark border-l border-slate-800 flex flex-col drawer-shadow z-50 transition-transform duration-300 ease-in-out translate-x-full">
     {/* Drawer Header */}
     <div class="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-background-dark">
       <h2 class="text-sm font-bold text-slate-300 uppercase tracking-widest">Details</h2>
@@ -8,7 +8,7 @@ export const DetailDrawer = () => (
         <span class="material-symbols-outlined">close</span>
       </button>
     </div>
-    
+
     {/* Drawer Content */}
     <div id="drawer-content" class="flex-1 overflow-y-auto">
       {/* Loading State */}
@@ -18,7 +18,7 @@ export const DetailDrawer = () => (
           <p class="text-sm text-slate-400">Loading details...</p>
         </div>
       </div>
-      
+
       {/* Loaded Content */}
       <div id="drawer-loaded" class="hidden">
         {/* Hero Section with Progress Ring */}
@@ -35,7 +35,7 @@ export const DetailDrawer = () => (
           </div>
           <h2 id="drawer-torrent-name" class="text-lg font-bold text-center text-white mb-1 px-4 leading-tight max-w-full break-words">--</h2>
           <div id="drawer-hash" class="text-[10px] text-slate-500 font-mono mb-6">HASH: --</div>
-          
+
           {/* Action Buttons */}
           <div class="flex items-center gap-4 w-full justify-center">
             <button id="drawer-btn-pause" class="flex flex-col items-center gap-1 group">
@@ -70,7 +70,7 @@ export const DetailDrawer = () => (
             </button>
           </div>
         </div>
-        
+
         {/* Tabs */}
         <div class="flex border-b border-slate-800 bg-background-dark px-6 sticky top-0 z-10">
           <button data-tab="overview" class="drawer-tab py-3 mr-6 text-xs font-bold text-primary border-b-2 border-primary transition-colors">Overview</button>
@@ -78,7 +78,7 @@ export const DetailDrawer = () => (
           <button data-tab="peers" class="drawer-tab py-3 mr-6 text-xs font-medium text-slate-400 hover:text-slate-200 border-b-2 border-transparent hover:border-slate-700 transition-colors">Peers <span id="drawer-peers-count" class="ml-1 text-[9px] bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded-full">0</span></button>
           <button data-tab="trackers" class="drawer-tab py-3 text-xs font-medium text-slate-400 hover:text-slate-200 border-b-2 border-transparent hover:border-slate-700 transition-colors">Trackers</button>
         </div>
-        
+
         {/* Tab Content - Overview */}
         <div id="tab-overview" class="tab-content">
           <div class="p-6 grid grid-cols-2 gap-y-5 gap-x-4 border-b border-slate-800/50">
@@ -111,7 +111,7 @@ export const DetailDrawer = () => (
               <p id="drawer-path" class="text-xs text-slate-300 font-mono break-all bg-slate-800/50 p-2 rounded border border-slate-800">--</p>
             </div>
           </div>
-          
+
           {/* Speed Section */}
           <div class="p-6 bg-slate-900/30">
             <div class="flex justify-between items-end mb-3">
@@ -133,7 +133,7 @@ export const DetailDrawer = () => (
               {/* Speed bars will be injected here */}
             </div>
           </div>
-          
+
           {/* Files Preview */}
           <div class="p-6">
             <div class="flex items-center justify-between mb-4">
@@ -145,16 +145,16 @@ export const DetailDrawer = () => (
             </div>
           </div>
         </div>
-        
+
         {/* Tab Content - Files */}
         <div id="tab-files" class="tab-content hidden flex flex-col h-full bg-[#0f1115]">
           {/* File Layout Header (Filter & Actions) */}
           <div class="px-6 py-4 border-b border-slate-800 bg-surface-dark/50 shrink-0">
             <div class="flex items-center gap-2 w-full">
-              <input id="files-filter-input" class="bg-slate-900 border border-slate-700 rounded text-xs text-slate-300 px-3 py-2 w-full focus:ring-1 focus:ring-primary focus:border-primary placeholder-slate-600 outline-none transition-all" placeholder="Filter files..." type="text"/>
+              <input id="files-filter-input" class="bg-slate-900 border border-slate-700 rounded text-xs text-slate-300 px-3 py-2 w-full focus:ring-1 focus:ring-primary focus:border-primary placeholder-slate-600 outline-none transition-all" placeholder="Filter files..." type="text" />
             </div>
           </div>
-          
+
           {/* File Table Header */}
           <div class="flex-1 overflow-y-auto">
             <table class="w-full text-left border-collapse">
@@ -162,7 +162,7 @@ export const DetailDrawer = () => (
                 <tr>
                   <th id="th-sort-name" class="group px-6 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-widest cursor-pointer hover:text-slate-300 transition-colors select-none" data-key="name">
                     <div class="flex items-center gap-1">
-                      File Name 
+                      File Name
                       <span class="sort-icon material-symbols-outlined text-xs opacity-0 group-hover:opacity-50 transition-opacity">unfold_more</span>
                     </div>
                   </th>
@@ -191,7 +191,7 @@ export const DetailDrawer = () => (
               </tbody>
             </table>
           </div>
-          
+
           {/* Pagination Footer */}
           <div id="files-pagination" class="px-6 py-3 border-t border-slate-800 bg-surface-dark/50 shrink-0 flex items-center justify-between text-xs hidden">
             <span id="files-pagination-info" class="text-slate-500">Showing 0-0 of 0</span>
@@ -201,7 +201,7 @@ export const DetailDrawer = () => (
             </div>
           </div>
         </div>
-        
+
         {/* Tab Content - Peers */}
         <div id="tab-peers" class="tab-content hidden">
           <div class="p-4">
@@ -210,7 +210,7 @@ export const DetailDrawer = () => (
             </div>
           </div>
         </div>
-        
+
         {/* Tab Content - Trackers */}
         <div id="tab-trackers" class="tab-content hidden">
           <div class="p-4">
