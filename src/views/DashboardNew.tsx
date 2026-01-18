@@ -92,6 +92,17 @@ export const DashboardNew = ({ torrents, systemInfo }: DashboardProps) => {
           .material-symbols-outlined { font-size: 20px; font-variation-settings: 'FILL' 0, 'wght' 500; }
           .touch-callout-none { -webkit-touch-callout: none !important; -webkit-user-select: none !important; user-select: none !important; }
           #torrent-table-body tr { -webkit-touch-callout: none !important; -webkit-user-select: none !important; user-select: none !important; }
+          
+          /* Modern Scrollbar Styles */
+          ::-webkit-scrollbar { width: 6px; height: 6px; }
+          ::-webkit-scrollbar-track { background: transparent; }
+          ::-webkit-scrollbar-thumb { 
+            background: #94a3b8; 
+            border: 2px solid #0f1115; 
+            border-radius: 10px;
+          }
+          ::-webkit-scrollbar-thumb:hover { background: #cbd5e1; }
+          * { scrollbar-width: thin; scrollbar-color: #94a3b8 transparent; }
         `}} />
       </head>
       <body class="bg-background-dark text-slate-100 antialiased overflow-hidden">
