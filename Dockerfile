@@ -1,23 +1,37 @@
-FROM oven/bun:1
+# Build stage
+FROM golang:1.21-alpine AS builder
 
 WORKDIR /app
 
-# Copy package files
-COPY package.json bun.lock* ./
+# Install templ CLI
+RUN go install github.com/a-h/templ/cmd/templ@latest
 
-# Install dependencies
-RUN bun install --frozen-lockfile
+# Copy Go module files
+COPY go.mod go.sum ./
+RUN go mod download
 
 # Copy source code
 COPY . .
 
+# Generate templ files
+RUN templ generate
+
 # Build the application
-RUN bun run build
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o rtorrent-webui cmd/server/main.go
+
+# Runtime stage
+FROM alpine:latest
+
+WORKDIR /app
+
+# Copy binary from builder
+COPY --from=builder /app/rtorrent-webui .
+
+# Copy public assets if needed
+COPY --from=builder /app/public ./public
 
 # Expose the port
-EXPOSE 3001
+EXPOSE 8080
 
-ENV PORT=3001
-
-# Start the application
-CMD ["bun", "run", "dist/index.js"]
+# Run the application
+CMD ["./rtorrent-webui"]

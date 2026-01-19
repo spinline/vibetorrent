@@ -1,0 +1,199 @@
+package layout
+
+templ Base(title string) {
+	<!DOCTYPE html>
+	<html lang="en" class="dark" style="background-color: #0b0c0f;">
+		<head>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+			<title>{ title }</title>
+			// PWA Meta Tags
+			<meta name="apple-mobile-web-app-capable" content="yes"/>
+			<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+			<meta name="apple-mobile-web-app-title" content="rTorrent"/>
+			<meta name="format-detection" content="telephone=no"/>
+			<meta name="mobile-web-app-capable" content="yes"/>
+			<meta name="apple-touch-fullscreen" content="yes"/>
+			<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png"/>
+			<link rel="manifest" href="/assets/manifest.json"/>
+			// Preload critical assets
+			<link rel="preload" href="/assets/fonts/material-symbols.woff2" as="font" type="font/woff2" crossorigin="anonymous"/>
+			// Embedded Assets (HTMX & Alpine.js)
+			<script src="/assets/js/htmx.min.js"></script>
+			<script defer src="/assets/js/alpine.min.js"></script>
+			// Tailwind CSS
+			<script src="https://cdn.tailwindcss.com"></script>
+			<script>
+		tailwind.config = {
+			theme: {
+				extend: {
+					colors: {
+						primary: '#0d9488',
+						'primary-hover': '#0f766e',
+						'background-dark': '#0b0c0f',
+						'surface-dark': '#13151a',
+						'surface-lighter': '#1a1d23',
+					},
+					fontFamily: {
+						sans: ['Inter', 'system-ui', 'sans-serif'],
+					}
+				}
+			}
+		}
+	</script>
+			// Fonts (Self-hosted fallback)
+			<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+			<style>
+		@font-face {
+			font-family: 'Material Symbols Outlined';
+			font-style: normal;
+			font-weight: 100 700;
+			src: url(/assets/fonts/material-symbols.woff2) format('woff2');
+			font-display: block;
+		}
+
+		[x-cloak] { display: none !important; }
+		@media (min-width: 768px) {
+			aside[x-cloak] { display: flex !important; }
+		}
+		body { font-family: 'Inter', system-ui, sans-serif; background-color: #0b0c0f; color: #f1f5f9; }
+		a { color: inherit; text-decoration: none; }
+		a:visited { color: inherit; }
+		
+		.bg-background-dark { background-color: #0b0c0f !important; }
+		.bg-surface-dark { background-color: #13151a !important; }
+		.text-primary { color: #0d9488 !important; }
+		.text-slate-400 { color: #94a3b8 !important; }
+		.text-slate-500 { color: #64748b !important; }
+		.border-slate-800 { border-color: rgba(30, 41, 59, 0.6) !important; }
+		.divide-slate-800 > * + * { border-color: rgba(30, 41, 59, 0.6) !important; }
+		
+		/* Safari FOUC stabilization */
+		.rounded-xl { border-radius: 0.75rem !important; }
+		.border-transparent { border-color: transparent !important; }
+		.border-white\/5 { border-color: rgba(255, 255, 255, 0.05) !important; }
+		nav a { border-style: solid; border-width: 1px; }
+		
+		/* Layout Stability (Pre-Tailwind) */
+		.px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
+		.py-4 { padding-top: 1rem; padding-bottom: 1rem; }
+		.p-8 { padding: 2rem; }
+		.md\:p-8 { @media (min-width: 768px) { padding: 2rem; } }
+		tr { height: 73px; }
+		table { width: 100%; border-collapse: collapse; }
+		.flex { display: flex; }
+		.flex-col { flex-direction: column; }
+		.items-center { align-items: center; }
+		.justify-between { justify-content: space-between; }
+		
+		.material-symbols-outlined {
+			font-family: 'Material Symbols Outlined';
+			font-size: 20px;
+			font-variation-settings: 'FILL' 0, 'wght' 500;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			width: 1em;
+			height: 1em;
+		}
+		::-webkit-scrollbar { width: 5px; height: 5px; }
+		::-webkit-scrollbar-track { background: transparent; }
+		::-webkit-scrollbar-thumb { background: #94a3b8; border: 2px solid #0b0c0f; background-clip: padding-box; border-radius: 10px; }
+		::-webkit-scrollbar-thumb:hover { background: #cbd5e1; }
+		* { scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent; }
+		
+		.no-scrollbar::-webkit-scrollbar { display: none; }
+		.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+		/* Native iOS Feel Utilities */
+		:root {
+			--safe-top: env(safe-area-inset-top);
+			--safe-bottom: env(safe-area-inset-bottom);
+			--safe-left: env(safe-area-inset-left);
+			--safe-right: env(safe-area-inset-right);
+		}
+
+		.safe-top { padding-top: var(--safe-top); }
+		.safe-bottom { padding-bottom: var(--safe-bottom); }
+		.safe-p { 
+			padding-top: var(--safe-top);
+			padding-bottom: var(--safe-bottom);
+			padding-left: var(--safe-left);
+			padding-right: var(--safe-right);
+		}
+
+		/* Disable native mobile behaviors for native feel */
+		* {
+			-webkit-tap-highlight-color: transparent;
+			-webkit-touch-callout: none;
+		}
+
+		input, textarea, [contenteditable="true"] {
+			-webkit-touch-callout: default;
+			user-select: text !important;
+		}
+
+		.no-select {
+			user-select: none;
+			-webkit-user-select: none;
+		}
+
+		body {
+			user-select: none;
+			-webkit-user-select: none;
+			overscroll-behavior-y: none; /* Prevent pull-to-refresh if not desired */
+			scrollbar-gutter: stable;
+		}
+
+		/* Smooth Scrollers */
+		.scroll-touch {
+			-webkit-overflow-scrolling: touch;
+		}
+
+		/* Smooth Backdrop Blur Animation */
+		.backdrop-blur-md {
+			-webkit-backdrop-filter: blur(16px);
+			backdrop-filter: blur(16px);
+			background-color: rgba(0, 0, 0, 0.4);
+		}
+
+		/* View Transitions Core */
+		::view-transition-group(modal-backdrop) {
+			animation-duration: 400ms;
+			animation-timing-function: ease-out;
+		}
+
+		::view-transition-group(add-torrent-modal) {
+			animation-duration: 500ms;
+			animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+		}
+
+		::view-transition-old(add-torrent-modal) {
+			animation: 300ms cubic-bezier(0.4, 0, 1, 1) both fade-out,
+					   300ms cubic-bezier(0.4, 0, 1, 1) both scale-down;
+		}
+
+		::view-transition-new(add-torrent-modal) {
+			animation: 500ms cubic-bezier(0.16, 1, 0.3, 1) both fade-in,
+					   500ms cubic-bezier(0.16, 1, 0.3, 1) both scale-up;
+		}
+
+		@keyframes fade-in {
+			from { opacity: 0; }
+		}
+		@keyframes fade-out {
+			to { opacity: 0; }
+		}
+		@keyframes scale-up {
+			from { transform: scale(0.95) translateY(20px); }
+		}
+		@keyframes scale-down {
+			to { transform: scale(0.95) translateY(20px); }
+		}
+	</style>
+		</head>
+		<body class="bg-background-dark text-slate-100 antialiased overflow-hidden h-[100dvh]" style="background-color: #0b0c0f;">
+			{ children... }
+		</body>
+	</html>
+}

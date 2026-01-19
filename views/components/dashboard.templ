@@ -1,0 +1,108 @@
+package components
+
+import (
+	"fmt"
+	"rtorrent-go/internal/rtorrent"
+	"rtorrent-go/views/layout"
+)
+
+type DashboardProps struct {
+	Torrents []rtorrent.Torrent
+	Stats    Stats
+	Sidebar  SidebarProps
+	SortBy   string
+	Order    string
+}
+
+templ AppLayout(sidebar templ.Component, activeFilter, title string) {
+	@layout.Base(title) {
+		<div
+			x-data={ fmt.Sprintf("{ mobileMenuOpen: false, activeFilter: '%s' }", activeFilter) }
+			class="flex h-[100dvh] w-full bg-background-dark relative overflow-hidden"
+		>
+			@sidebar
+			<div class="flex-1 flex flex-col overflow-hidden" id="main-content">
+				{ children... }
+			</div>
+			<!-- Detail Drawer and Modals stay persistent -->
+			@DetailDrawer()
+			@AddTorrentModal()
+			@ContextMenu()
+		</div>
+	}
+}
+
+templ DashboardPage(props DashboardProps) {
+	@AppLayout(TransfersSidebar(props.Sidebar), props.Sidebar.Filter, "rTorrent Go Dashboard") {
+		@DashboardMainArea(props)
+	}
+}
+
+templ DashboardMainArea(props DashboardProps) {
+	<main class="flex-1 flex flex-col overflow-hidden">
+		<header
+			class="shrink-0 border-b border-slate-800 bg-background-dark/80 backdrop-blur-xl sticky top-0 z-30"
+		>
+			<div class="safe-top"></div>
+			<div class="h-16 flex items-center justify-between px-6 md:px-8">
+				<div class="flex items-center gap-6">
+					<button
+						id="mobile-menu-toggle"
+						@click="mobileMenuOpen = !mobileMenuOpen"
+						class="md:hidden text-slate-500 hover:text-white p-2"
+					>
+						<span class="material-symbols-outlined">menu</span>
+					</button>
+					<div class="relative w-64 hidden md:block">
+						<span
+							class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm"
+						>search</span>
+						<input
+							type="text"
+							placeholder="Filter torrents..."
+							class="w-full bg-surface-dark border-none rounded-lg pl-9 pr-4 py-1.5 text-xs text-slate-300 focus:ring-1 focus:ring-primary"
+						/>
+					</div>
+				</div>
+				<div class="flex items-center gap-4">
+					<a
+						href="/settings"
+						class="size-10 rounded-full bg-surface-dark border border-slate-800 flex items-center justify-center text-slate-400 hover:text-primary transition-colors"
+					>
+						<span class="material-symbols-outlined">settings</span>
+					</a>
+				</div>
+			</div>
+		</header>
+		<div
+			class="flex-1 overflow-y-auto no-scrollbar relative scroll-touch"
+			id="scroll-container"
+		>
+			<div class="p-4 md:p-8">
+				@StatsGrid(props.Stats)
+				<div class="mt-8">
+					<div class="flex border-b border-slate-800 mb-6 gap-8">
+						<button class="pb-3 border-b-2 border-primary text-primary text-sm font-bold">
+							Default View
+						</button>
+						<button
+							class="pb-3 border-b-2 border-transparent text-slate-500 hover:text-slate-300 text-sm font-bold"
+						>
+							Detailed Analytics
+						</button>
+					</div>
+					<div id="torrent-list">
+						@TorrentTable(props.Torrents, props.SortBy, props.Order, props.Sidebar.Filter)
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- Mobile Floating Action Button -->
+		<button
+			@click="$dispatch('open-add-modal')"
+			class="md:hidden fixed bottom-[calc(1.5rem+env(safe-area-inset-bottom))] right-6 size-14 bg-primary text-white rounded-full shadow-lg shadow-primary/40 flex items-center justify-center z-40 active:scale-95 transition-transform"
+		>
+			<span class="material-symbols-outlined text-3xl">add</span>
+		</button>
+	</main>
+}

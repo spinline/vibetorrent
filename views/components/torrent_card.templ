@@ -1,0 +1,68 @@
+package components
+
+import (
+	"fmt"
+	"rtorrent-go/internal/rtorrent"
+)
+
+templ TorrentCard(t rtorrent.Torrent) {
+	<div
+		class="p-4 hover:bg-white/5 transition-colors group cursor-pointer select-none active:bg-white/10"
+		x-data={ fmt.Sprintf("{ deleted: false, pressTimer: null, longPressTriggered: false, hash: '%s', name: '%s', priority: %d }", t.Hash, t.Name, t.Priority) }
+		x-show="!deleted"
+		x-transition:leave="transition ease-in duration-300"
+		hx-get={ fmt.Sprintf("/torrent/%s/details", t.Hash) }
+		hx-target="#drawer-content"
+		@click="if(!longPressTriggered) $dispatch('open-drawer')"
+		@contextmenu.prevent="$dispatch('open-context-menu', {x: $event.clientX, y: $event.clientY, hash: hash, name: name, priority: priority})"
+		@touchstart="longPressTriggered = false; pressTimer = setTimeout(() => { longPressTriggered = true; if (window.navigator.vibrate) window.navigator.vibrate(40); $dispatch('open-context-menu', {x: $event.touches[0].clientX, y: $event.touches[0].clientY, hash: hash, name: name, priority: priority}); }, 500)"
+		@touchend="clearTimeout(pressTimer); if(longPressTriggered) $event.preventDefault()"
+		@touchmove="clearTimeout(pressTimer)"
+	>
+		<div class="flex flex-col gap-3">
+			<div class="flex items-start justify-between gap-4">
+				<div class="flex items-start gap-3 min-w-0">
+					<span class="material-symbols-outlined text-slate-400 mt-0.5">description</span>
+					<div class="min-w-0">
+						<div class="text-sm font-bold truncate text-white uppercase tracking-tight" title={ t.Name }>{ t.Name }</div>
+						<div class="flex items-center gap-2 mt-1">
+							<span class="text-[10px] text-slate-500 font-bold tracking-widest uppercase">{ FormatBytes(t.Size) }</span>
+							<span class="text-[10px] text-slate-600">•</span>
+							@templ.Raw(GetStatusBadge(t.State))
+						</div>
+					</div>
+				</div>
+				<button
+					class="size-10 flex items-center justify-center bg-slate-800/50 rounded-full text-slate-500 hover:text-red-400 transition-colors"
+					@click.stop="if(confirm('Are you sure?')) { deleted = true; htmx.ajax('DELETE', '/torrent/' + hash, { swap: 'none' }) }"
+				>
+					<span class="material-symbols-outlined text-xl">delete</span>
+				</button>
+			</div>
+			<div class="space-y-2">
+				<div class="flex items-center justify-between">
+					<div class="flex-1 h-1.5 bg-slate-800 rounded-full overflow-hidden mr-4">
+						<div class={ "h-full " + GetProgressColor(t.State) } style={ fmt.Sprintf("width: %.1f%%", t.Progress) }></div>
+					</div>
+					<span class="text-xs font-black text-white">{ fmt.Sprintf("%.0f%%", t.Progress) }</span>
+				</div>
+				<div class="flex items-center justify-between">
+					<div class="flex items-center gap-4">
+						<div class="flex items-center gap-1.5">
+							<span class="material-symbols-outlined text-primary text-[14px]">arrow_downward</span>
+							<span class={ "text-xs tabular-nums " + getSpeedClass(t.DownloadRate > 0, true) }>{ FormatSpeed(t.DownloadRate) }</span>
+						</div>
+						<div class="flex items-center gap-1.5">
+							<span class="material-symbols-outlined text-emerald-500 text-[14px]">arrow_upward</span>
+							<span class={ "text-xs tabular-nums " + getSpeedClass(t.UploadRate > 0, false) }>{ FormatSpeed(t.UploadRate) }</span>
+						</div>
+					</div>
+					<div class="flex items-center gap-1.5 text-slate-500">
+						<span class="material-symbols-outlined text-[14px]">schedule</span>
+						<span class="text-[10px] font-bold tracking-widest uppercase tabular-nums">{ FormatETA(t.Size, t.Completed, t.DownloadRate) }</span>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+}

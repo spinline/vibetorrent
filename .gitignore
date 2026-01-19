@@ -1,10 +1,16 @@
-node_modules/
+# Go binary
+rtorrent-webui
+
+# Templ generated files
+*_templ.go
+
+# System files
 *.log
 .DS_Store
+
+# Docker volumes
 docker/data/
 docker/downloads/
 *.meta
 docker/config/.session/
 docker/config/.local/
-dist/
-bun.lockb

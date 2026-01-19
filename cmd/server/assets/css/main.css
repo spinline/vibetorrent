@@ -1,0 +1,25 @@
+:root {
+  --primary: #12a1a1;
+  --bg-dark: #0f1115;
+  --surface-dark: #1a1c24;
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+}
+
+body {
+  background-color: var(--bg-dark);
+  color: var(--text-primary);
+  font-family: 'Inter', system-ui, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+.bg-surface-dark { background-color: var(--surface-dark); }
+.text-primary { color: var(--primary); }
+.bg-primary { background-color: var(--primary); }
+
+/* Simplified Grid */
+.container { width: 100%; max-width: 800px; margin: 0 auto; padding: 1rem; }
+
+/* Transitions for Optimistic UI */
+.transition-all { transition: all 0.3s ease; }

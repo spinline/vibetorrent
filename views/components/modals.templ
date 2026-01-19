@@ -1,0 +1,204 @@
+package components
+
+templ AddTorrentModal() {
+	<div
+		x-data="{ 
+			open: false, 
+			sourceType: 'file',
+			downloadPath: localStorage.getItem('defaultDownloadPath') || '/downloads',
+			priority: '2',
+			autoStart: localStorage.getItem('autoStartDownloads') !== 'false',
+			fileName: '',
+			error: '',
+			openModal() {
+				// Refresh settings from localStorage when opening modal
+				this.downloadPath = localStorage.getItem('defaultDownloadPath') || '/downloads';
+				this.autoStart = localStorage.getItem('autoStartDownloads') !== 'false';
+				
+				if (document.startViewTransition) {
+					document.startViewTransition(() => {
+						this.open = true;
+					});
+				} else {
+					this.open = true;
+				}
+			},
+			closeModal() {
+				if (document.startViewTransition) {
+					document.startViewTransition(() => {
+						this.open = false;
+					});
+				} else {
+					this.open = false;
+				}
+			}
+		}"
+		@open-add-modal.window="openModal()"
+		x-show="open"
+		x-cloak
+		class="fixed inset-0 z-[100] flex items-center justify-center p-4"
+	>
+		<!-- Backdrop Overlay -->
+		<div
+			class="absolute inset-0 bg-black/60 backdrop-blur-md transition-opacity duration-300 ease-out"
+			:class="open ? 'opacity-100' : 'opacity-0'"
+			@click="closeModal()"
+		></div>
+		<!-- Modal Container -->
+		<div
+			class="relative w-full md:max-w-5xl bg-surface-dark border border-slate-800 rounded-xl shadow-2xl flex flex-col h-full md:h-auto md:max-h-[90vh] overflow-hidden will-change-transform"
+			:class="open ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-8'"
+			style="view-transition-name: add-torrent-modal;"
+		>
+			<!-- Header -->
+			<div class="flex items-center justify-between px-6 md:px-8 py-5 border-b border-slate-800 safe-top bg-background-dark/50 backdrop-blur-lg sticky top-0 z-10 shrink-0">
+				<h2 class="text-xl font-bold tracking-tight text-white flex items-center gap-3">
+					<span class="material-symbols-outlined text-primary">add_circle</span>
+					Add New Torrent
+				</h2>
+				<button @click="closeModal()" type="button" class="text-slate-500 hover:text-white transition-colors rounded-full p-2 hover:bg-slate-800">
+					<span class="material-symbols-outlined">close</span>
+				</button>
+			</div>
+			<form
+				hx-post="/torrent/add"
+				hx-encoding="multipart/form-data"
+				hx-target="#app-container"
+				@htmx:after-request="if (event.detail.successful) { closeModal(); }"
+				class="flex flex-col flex-1 overflow-hidden"
+			>
+				<div class="flex flex-col md:flex-row flex-1 overflow-y-auto no-scrollbar scroll-touch">
+					<!-- Left Side - Source -->
+					<div class="flex-1 p-6 md:p-8 md:border-r border-slate-800 flex flex-col gap-6">
+						<div class="flex flex-col gap-2">
+							<label class="text-sm font-medium text-slate-400 ml-1">Source Type</label>
+							<div class="flex bg-background-dark p-1 rounded-lg border border-slate-800">
+								<button
+									type="button"
+									@click="sourceType = 'file'"
+									:class="sourceType === 'file' ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-400'"
+									class="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-md text-sm font-medium transition-all"
+								>
+									<span class="material-symbols-outlined text-[18px]">upload_file</span>
+									File
+								</button>
+								<button
+									type="button"
+									@click="sourceType = 'url'"
+									:class="sourceType === 'url' ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-400'"
+									class="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-md text-sm font-medium transition-all"
+								>
+									<span class="material-symbols-outlined text-[18px]">link</span>
+									URL / Magnet
+								</button>
+							</div>
+						</div>
+						<!-- File Upload Zone -->
+						<div
+							x-show="sourceType === 'file'"
+							class="flex-1 min-h-[200px] md:min-h-[280px] rounded-2xl flex flex-col items-center justify-center p-6 md:p-8 gap-4 md:gap-6 transition-all duration-300 group cursor-pointer relative overflow-hidden border-2 border-dashed border-primary/20 hover:border-primary/50 bg-gradient-to-br from-slate-900 to-slate-950"
+						>
+							<input
+								type="file"
+								name="torrent_file"
+								accept=".torrent"
+								class="absolute inset-0 opacity-0 cursor-pointer z-20"
+								@change="fileName = $event.target.files[0] ? $event.target.files[0].name : ''"
+							/>
+							<div class="relative z-10 w-20 h-20 md:w-24 md:h-24 rounded-full bg-slate-800 flex items-center justify-center border border-primary/20 group-hover:scale-105 transition-all duration-300 shadow-lg">
+								<span class="material-symbols-outlined text-primary text-4xl md:text-5xl transition-all duration-300 group-hover:drop-shadow-[0_0_15px_rgba(18,161,161,0.5)]">cloud_upload</span>
+							</div>
+							<div class="text-center space-y-1 relative z-10">
+								<p class="text-lg md:text-xl font-bold text-white tracking-tight px-2 break-all" x-text="fileName || 'Drop .torrent file here'"></p>
+								<p class="text-xs md:text-sm text-slate-400 font-medium group-hover:text-slate-300 transition-colors">or click to browse local files</p>
+							</div>
+						</div>
+						<!-- URL Input Zone -->
+						<div x-show="sourceType === 'url'" class="flex-1 min-h-[200px] md:min-h-[280px] flex flex-col gap-4">
+							<div class="flex-1 rounded-2xl p-4 md:p-6 border border-slate-800 bg-slate-900/50">
+								<label class="block text-sm font-medium text-slate-300 mb-3">Magnet Link or Torrent URL</label>
+								<textarea
+									name="torrent_url"
+									class="w-full h-32 bg-background-dark border border-slate-800 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600 focus:ring-1 focus:ring-primary focus:border-transparent transition-all resize-none font-mono"
+									placeholder="magnet:?xt=urn:btih:... or https://..."
+								></textarea>
+							</div>
+						</div>
+					</div>
+					<!-- Right Side - Configuration -->
+					<div class="flex-1 p-6 md:p-8 bg-background-dark/30 flex flex-col gap-6">
+						<div class="flex items-center gap-2 text-primary font-medium text-xs uppercase tracking-widest mb-2 px-1">
+							<span class="material-symbols-outlined text-[18px]">tune</span>
+							Configuration
+						</div>
+						<!-- Download Location -->
+						<div class="space-y-3">
+							<label class="block text-sm font-medium text-slate-400 ml-1">Download Location</label>
+							<div class="flex items-center bg-background-dark border border-slate-800 rounded-xl pr-1 focus-within:ring-1 focus-within:ring-primary focus-within:border-transparent transition-all">
+								<input
+									type="text"
+									name="download_path"
+									x-model="downloadPath"
+									class="bg-transparent border-none text-white text-sm w-full p-3.5 focus:ring-0 placeholder-slate-600 font-mono"
+									placeholder="/path/to/download"
+								/>
+							</div>
+						</div>
+						<!-- Priority -->
+						<div class="space-y-3">
+							<label class="block text-sm font-medium text-slate-400 ml-1">Priority</label>
+							<div class="grid grid-cols-3 gap-2 md:gap-3">
+								<label class="cursor-pointer">
+									<input type="radio" name="priority" value="1" x-model="priority" class="peer sr-only"/>
+									<div class="h-10 rounded-xl border border-slate-800 bg-background-dark flex items-center justify-center text-[13px] font-medium text-slate-400 hover:bg-slate-800 peer-checked:border-primary peer-checked:text-primary peer-checked:bg-primary/10 transition-all">
+										Low
+									</div>
+								</label>
+								<label class="cursor-pointer">
+									<input type="radio" name="priority" value="2" x-model="priority" class="peer sr-only"/>
+									<div class="h-10 rounded-xl border border-slate-800 bg-background-dark flex items-center justify-center text-[13px] font-medium text-slate-400 hover:bg-slate-800 peer-checked:border-primary peer-checked:text-primary peer-checked:bg-primary/10 transition-all">
+										Normal
+									</div>
+								</label>
+								<label class="cursor-pointer">
+									<input type="radio" name="priority" value="3" x-model="priority" class="peer sr-only"/>
+									<div class="h-10 rounded-xl border border-slate-800 bg-background-dark flex items-center justify-center text-[13px] font-medium text-slate-400 hover:bg-slate-800 peer-checked:border-primary peer-checked:text-primary peer-checked:bg-primary/10 transition-all">
+										High
+									</div>
+								</label>
+							</div>
+						</div>
+						<!-- Auto Start -->
+						<div class="pt-2 px-1">
+							<label class="flex items-center gap-3 cursor-pointer group">
+								<div class="relative flex items-center">
+									<input type="checkbox" name="auto_start" x-model="autoStart" class="peer h-5 w-5 cursor-pointer appearance-none rounded-md border border-slate-700 bg-background-dark checked:border-primary checked:bg-primary transition-all"/>
+									<span class="material-symbols-outlined absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-[16px] text-white opacity-0 peer-checked:opacity-100 pointer-events-none">check</span>
+								</div>
+								<span class="text-sm text-slate-400 group-hover:text-slate-200 transition-colors">Start automatically</span>
+							</label>
+						</div>
+					</div>
+				</div>
+				<input type="hidden" name="source_type" :value="sourceType"/>
+				<!-- Footer -->
+				<div class="p-6 md:p-8 border-t border-slate-800/60 bg-background-dark/80 backdrop-blur-lg flex flex-col md:flex-row justify-end items-center gap-4 shrink-0 safe-bottom">
+					<button
+						type="button"
+						@click="closeModal()"
+						class="w-full md:w-auto px-6 py-3 rounded-xl text-sm font-bold text-slate-400 hover:text-white hover:bg-slate-800 transition-colors order-2 md:order-1"
+					>
+						Cancel
+					</button>
+					<button
+						type="submit"
+						class="w-full md:w-auto px-10 py-3 rounded-xl bg-primary hover:bg-primary/90 text-white text-sm font-bold shadow-lg shadow-primary/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2 order-1 md:order-2"
+					>
+						<span class="material-symbols-outlined text-[20px]">bolt</span>
+						Add Torrent
+					</button>
+				</div>
+			</form>
+		</div>
+	</div>
+}

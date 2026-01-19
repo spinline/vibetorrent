@@ -1,0 +1,383 @@
+package components
+
+import "fmt"
+
+templ ContextMenu() {
+	<div
+		x-data="contextMenu()"
+		@keydown.escape.window="close()"
+		@open-context-menu.window="openAt($event.detail.x, $event.detail.y, $event.detail.hash, $event.detail.name, $event.detail.priority)"
+		x-show="open"
+		x-cloak
+	>
+		<!-- Transparent Backdrop for closing -->
+		<div
+			class="fixed inset-0 z-[999] bg-transparent cursor-default"
+			@click="close()"
+			@contextmenu.prevent="close()"
+		></div>
+		<!-- Menu Container -->
+		<div
+			x-ref="menuContainer"
+			class="fixed z-[1000] min-w-[200px] bg-surface-dark border border-slate-800/60 rounded-xl shadow-2xl overflow-hidden py-1 animation-context-menu backdrop-blur-md"
+			:style="`left: ${x}px; top: ${y}px; visibility: ${visible ? 'visible' : 'hidden'}`"
+			@click.stop
+		>
+			<!-- Actions Section -->
+			<div class="py-0.5">
+				@contextMenuItem("Start", "play_arrow", "text-emerald-500", "start")
+				@contextMenuItem("Pause", "pause", "text-orange-400", "pause")
+				@contextMenuItem("Stop", "stop", "text-slate-400", "stop")
+			</div>
+			<div class="border-t border-slate-800/60 my-0.5"></div>
+			<div class="py-0.5">
+				@contextMenuItem("Recheck", "refresh", "text-blue-400", "recheck")
+				@contextMenuItem("Reannounce", "campaign", "text-purple-400", "reannounce")
+			</div>
+			<div class="border-t border-slate-800/60 my-0.5"></div>
+			<div class="py-0.5">
+				@contextMenuItem("Copy Magnet", "link", "text-primary", "copyMagnet")
+				@contextMenuItem("Copy Hash", "tag", "text-slate-400", "copyHash")
+			</div>
+			<div class="border-t border-slate-800/60 my-0.5"></div>
+			<div class="py-0.5">
+				@contextMenuItem("Set Label...", "label", "text-amber-500/80", "setLabel")
+				<!-- Priority Submenu Trigger -->
+				<button
+					x-ref="priorityBtn"
+					@click.stop="togglePriority()"
+					@mouseenter="if(window.innerWidth > 768) showPriority = true"
+					@mouseleave="if(window.innerWidth > 768) startPriorityTimeout()"
+					class="w-full px-3.5 py-2 text-left flex items-center gap-2.5 hover:bg-white/5 transition-colors text-[13px] group justify-between"
+				>
+					<div class="flex items-center gap-2.5">
+						<span class="material-symbols-outlined text-indigo-400 text-base">low_priority</span>
+						<span class="text-slate-200">Priority</span>
+					</div>
+					<div class="flex items-center gap-2">
+						<span class="text-[10px] text-slate-500 font-bold uppercase tracking-wider" x-text="getPriorityLabel(activePriority)"></span>
+						<span class="material-symbols-outlined text-slate-500 text-sm">chevron_right</span>
+					</div>
+				</button>
+			</div>
+			<div class="border-t border-slate-800/60 my-0.5"></div>
+			<div class="py-0.5">
+				@contextMenuItem("Remove", "delete", "text-red-500/80", "remove")
+				@contextMenuItem("Remove with Data", "delete_forever", "text-red-600/90 font-medium", "removeWithData")
+			</div>
+		</div>
+		<!-- Priority Submenu -->
+		<div
+			x-show="showPriority"
+			x-transition:enter="transition ease-out duration-100"
+			x-transition:enter-start="opacity-0 scale-95"
+			x-transition:enter-end="opacity-100 scale-100"
+			@mouseenter="clearPriorityTimeout()"
+			@mouseleave="startPriorityTimeout()"
+			class="fixed z-[1001] min-w-[140px] bg-surface-dark border border-slate-800/60 rounded-xl shadow-2xl overflow-hidden py-1 backdrop-blur-md"
+			:style="`left: ${priorityX}px; top: ${priorityY}px; transform-origin: ${priorityOrigin}`"
+		>
+			@priorityItem("Off", "block", "0", "text-slate-500")
+			@priorityItem("Low", "south", "1", "text-blue-400")
+			@priorityItem("Normal", "horizontal_rule", "2", "text-emerald-400")
+			@priorityItem("High", "north", "3", "text-orange-400")
+		</div>
+		<!-- Label Modal (Simple Internal) -->
+		<div
+			x-show="showLabelModal"
+			class="fixed inset-0 z-[2000] flex items-center justify-center bg-black/60 backdrop-blur-sm px-4"
+			x-transition:enter="transition ease-out duration-300"
+			x-transition:enter-start="opacity-0"
+			x-transition:enter-end="opacity-100"
+			@click.stop
+		>
+			<div class="bg-surface-dark border border-slate-800 rounded-2xl w-full max-w-sm p-6 shadow-2xl" @click.stop>
+				<h3 class="text-lg font-bold mb-4">Set Label</h3>
+				<p class="text-xs text-slate-500 mb-4">Enter a label for "<span x-text="activeName"></span>"</p>
+				<input
+					type="text"
+					x-model="labelInput"
+					@keydown.enter="submitLabel()"
+					@keydown.escape="showLabelModal = false"
+					class="w-full bg-background-dark border border-slate-800 rounded-xl px-4 py-2.5 text-sm mb-6 focus:ring-1 focus:ring-primary outline-none"
+					placeholder="Label name..."
+					x-ref="labelField"
+				/>
+				<div class="flex gap-3">
+					<button @click="showLabelModal = false" class="flex-1 px-4 py-2.5 rounded-xl border border-slate-800 text-sm font-medium hover:bg-white/5 transition-colors">Cancel</button>
+					<button @click="submitLabel()" class="flex-1 px-4 py-2.5 rounded-xl bg-primary text-black text-sm font-bold hover:bg-primary-hover transition-colors">Apply</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script>
+		function contextMenu() {
+			return {
+				open: false,
+				visible: false,
+				x: 0,
+				y: 0,
+				lastOpen: 0, // Timestamp to prevent accidental closes
+				activeHash: null,
+				activeName: '',
+				activePriority: 0,
+				showPriority: false,
+				priorityX: 0,
+				priorityY: 0,
+				priorityOrigin: 'top left',
+				priorityTimeout: null,
+				showLabelModal: false,
+				labelInput: '',
+
+				openAt(x, y, hash, name, priority) {
+					this.activeHash = hash;
+					this.activeName = name;
+					this.activePriority = priority;
+					this.x = x;
+					this.y = y;
+					this.open = true;
+					this.visible = false;
+					this.showPriority = false;
+					this.showLabelModal = false;
+					this.lastOpen = Date.now();
+
+					// Wait for next tick to measure
+					this.$nextTick(() => {
+						const menu = this.$refs.menuContainer;
+						if (!menu) return;
+						
+						// Temporarily disable animation/transform for accurate measurement
+						const originalTransition = menu.style.transition;
+						const originalTransform = menu.style.transform;
+						menu.style.transition = 'none';
+						menu.style.transform = 'none';
+						
+						const rect = menu.getBoundingClientRect();
+						const width = rect.width || 200;
+						const height = rect.height || 300;
+						const margin = 16;
+						
+						// Restore styles
+						menu.style.transition = originalTransition;
+						menu.style.transform = originalTransform;
+						
+						// Calculate positioning
+						let targetX = x;
+						let targetY = y;
+						
+						// X positioning (simple clamp with margin)
+						if (targetX + width > window.innerWidth - margin) {
+							targetX = window.innerWidth - width - margin;
+						}
+						targetX = Math.max(margin, targetX);
+						
+						// Y positioning (flip if overflows bottom)
+						if (targetY + height > window.innerHeight - margin) {
+							targetY = Math.max(margin, targetY - height);
+						}
+						targetY = Math.max(margin, targetY);
+						
+						this.x = targetX;
+						this.y = targetY;
+						this.visible = true;
+					});
+				},
+
+				close() {
+					if (this.showLabelModal) return;
+					// Prevent immediate closure on mobile touch release
+					if (Date.now() - this.lastOpen < 300) return;
+					
+					this.open = false;
+					this.visible = false;
+					this.showPriority = false;
+				},
+
+				startPriorityTimeout() {
+					this.priorityTimeout = setTimeout(() => {
+						this.showPriority = false;
+					}, 300);
+				},
+
+				clearPriorityTimeout() {
+					clearTimeout(this.priorityTimeout);
+				},
+
+				togglePriority() {
+					this.showPriority = !this.showPriority;
+					if (this.showPriority) {
+						this.clearPriorityTimeout();
+						this.$nextTick(() => this.calculatePriorityPos());
+					}
+				},
+
+				getPriorityLabel(p) {
+					const labels = { '0': 'Off', '1': 'Low', '2': 'Norm', '3': 'High' };
+					return labels[p] || '';
+				},
+
+				calculatePriorityPos() {
+					if (!this.showPriority) return;
+					
+					const menuRect = this.$refs.menuContainer.getBoundingClientRect();
+					const btnRect = this.$refs.priorityBtn.getBoundingClientRect();
+					const subWidth = 140; 
+					const subHeight = 160; 
+					
+					// Horizontal positioning
+					let targetX = menuRect.right + 2;
+					let originX = 'left';
+					
+					if (targetX + subWidth > window.innerWidth - 8) {
+						targetX = menuRect.left - subWidth - 2;
+						originX = 'right';
+					}
+					
+					// Vertical positioning
+					let targetY = btnRect.top;
+					let originY = 'top';
+					
+					if (targetY + subHeight > window.innerHeight - 8) {
+						targetY = window.innerHeight - subHeight - 8;
+						originY = 'bottom';
+					}
+					
+					this.priorityX = Math.max(8, targetX);
+					this.priorityY = Math.max(8, targetY);
+					this.priorityOrigin = `${originY} ${originX}`;
+				},
+
+				async runAction(action) {
+					const hash = this.activeHash;
+					if (!hash) return;
+
+					if (action === 'setLabel') {
+						this.showLabelModal = true;
+						this.$nextTick(() => this.$refs.labelField.focus());
+						return;
+					}
+
+					let url = `/torrent/${hash}/${action}`;
+					let method = 'POST';
+					let body = null;
+
+					// Special cases
+					if (action === 'copyHash') {
+						await navigator.clipboard.writeText(hash);
+						this.close();
+						return;
+					}
+					if (action === 'copyMagnet') {
+						const magnet = `magnet:?xt=urn:btih:${hash}&dn=${encodeURIComponent(this.activeName)}`;
+						await navigator.clipboard.writeText(magnet);
+						this.close();
+						return;
+					}
+					if (action === 'remove') {
+						if(confirm('Are you sure you want to remove this torrent?')) {
+							fetch(`/torrent/${hash}`, { method: 'DELETE' })
+								.then(() => htmx.ajax('GET', '/list?filter=all', '#torrent-list'));
+						}
+						this.close();
+						return;
+					}
+					if (action === 'removeWithData') {
+						if(confirm('Are you sure you want to remove this torrent and DELETE ALL DATA?')) {
+							fetch(`/torrent/${hash}?deleteFiles=true`, { method: 'DELETE' })
+								.then(() => htmx.ajax('GET', '/list?filter=all', '#torrent-list'));
+						}
+						this.close();
+						return;
+					}
+
+					// Use fetch to trigger server actions
+					try {
+						await fetch(url, { method });
+						// Refresh the table via HTMX event
+						htmx.ajax('GET', '/list?filter=all', '#torrent-list');
+					} catch (e) {
+						console.error(e);
+					}
+
+					this.close();
+				},
+
+				async setPriority(priority) {
+					const hash = this.activeHash;
+					if (!hash) return;
+
+					try {
+						await fetch(`/torrent/${hash}/priority`, {
+							method: 'POST',
+							headers: { 'Content-Type': 'application/json' },
+							body: JSON.stringify({ priority: parseInt(priority) })
+						});
+						htmx.ajax('GET', '/list?filter=all', '#torrent-list');
+					} catch (e) {
+						console.error(e);
+					}
+					this.close();
+				},
+
+				async submitLabel() {
+					const hash = this.activeHash;
+					if (!hash) return;
+
+					try {
+						await fetch(`/torrent/${hash}/label`, {
+							method: 'POST',
+							headers: { 'Content-Type': 'application/json' },
+							body: JSON.stringify({ label: this.labelInput })
+						});
+						htmx.ajax('GET', '/list?filter=all', '#torrent-list');
+					} catch (e) {
+						console.error(e);
+					}
+					this.showLabelModal = false;
+					this.close();
+				},
+
+				init() {
+					this.$watch('showPriority', () => {
+						if (this.showPriority) this.calculatePriorityPos();
+					});
+				}
+			};
+		}
+	</script>
+	<style>
+		.animation-context-menu {
+			animation: context-menu-in 0.15s ease-out;
+		}
+		@keyframes context-menu-in {
+			from { opacity: 0; transform: scale(0.95); }
+			to { opacity: 1; transform: scale(1); }
+		}
+	</style>
+}
+
+templ contextMenuItem(label, icon, iconColor, action string) {
+	<button
+		@click={ fmt.Sprintf("runAction('%s')", action) }
+		class="w-full px-3.5 py-1.5 text-left flex items-center gap-2.5 hover:bg-white/5 transition-colors text-[13px] group"
+	>
+		<span class={ "material-symbols-outlined text-base " + iconColor }>{ icon }</span>
+		<span class="text-slate-200">{ label }</span>
+	</button>
+}
+
+templ priorityItem(label, icon, value, iconColor string) {
+	<button
+		@click={ fmt.Sprintf("setPriority('%s')", value) }
+		class="w-full px-3 py-1.5 text-left flex items-center gap-2.5 hover:bg-white/5 transition-colors text-[13px] group"
+	>
+		<span class={ "material-symbols-outlined text-base " + iconColor }>{ icon }</span>
+		<span class="font-medium flex-1 text-slate-300">{ label }</span>
+		<span
+			class="material-symbols-outlined text-primary text-sm transition-opacity"
+			x-show={ fmt.Sprintf("activePriority == %s", value) }
+		>
+			check
+		</span>
+	</button>
+}

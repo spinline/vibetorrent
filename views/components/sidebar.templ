@@ -1,0 +1,163 @@
+package components
+
+import "fmt"
+
+type SidebarProps struct {
+	Counts      map[string]int
+	Labels      []string
+	LabelCounts map[string]int
+	Filter      string
+}
+
+templ SidebarLayout(header templ.Component) {
+	<div class="relative">
+		<!-- Mobile Backdrop -->
+		<div
+			x-show="mobileMenuOpen"
+			x-cloak
+			x-transition:enter="transition ease-out duration-300"
+			x-transition:enter-start="opacity-0"
+			x-transition:enter-end="opacity-100"
+			x-transition:leave="transition ease-in duration-200"
+			x-transition:leave-start="opacity-100"
+			x-transition:leave-end="opacity-0"
+			@click="mobileMenuOpen = false"
+			class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden"
+		></div>
+		<!-- Sidebar Content -->
+		<aside
+			class="fixed inset-y-0 left-0 w-72 flex flex-col border-r border-slate-800/60 h-full bg-background-dark z-50 transition-transform duration-300 ease-in-out md:static md:translate-x-0 -translate-x-full shadow-2xl md:shadow-none"
+			:class="mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'"
+			x-cloak
+		>
+			<div class="safe-top"></div>
+			@header
+			{ children... }
+			<!-- User Section (Bottom) -->
+			<div class="mt-auto p-4 border-t border-slate-800/60 safe-bottom">
+				<div class="flex items-center gap-4 px-4 py-2">
+					<div class="size-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-400">
+						<span class="material-symbols-outlined text-xl">person</span>
+					</div>
+					<div class="overflow-hidden">
+						<p class="text-[13px] font-bold text-white truncate">Admin User</p>
+						<p class="text-[11px] text-slate-500 truncate">localhost</p>
+					</div>
+				</div>
+			</div>
+		</aside>
+	</div>
+}
+
+templ DefaultHeader() {
+	<div class="p-6 pb-2 flex items-center justify-between">
+		<div class="flex items-center gap-4">
+			<div class="size-12 bg-primary rounded-xl flex items-center justify-center text-white shadow-[0_0_20px_rgba(13,148,136,0.3)] shrink-0">
+				<span class="material-symbols-outlined text-2xl font-bold">box_edit</span>
+			</div>
+			<div class="overflow-hidden">
+				<h1 class="text-xl font-bold tracking-tight text-white truncate">rTorrent</h1>
+				<p class="text-[10px] text-primary font-bold uppercase tracking-wider">v0.9.8</p>
+			</div>
+		</div>
+		<button @click="mobileMenuOpen = false" class="md:hidden text-slate-500 hover:text-white p-2 shrink-0">
+			<span class="material-symbols-outlined">close</span>
+		</button>
+	</div>
+}
+
+templ SettingsHeader() {
+	<div class="p-6 pb-4">
+		<div class="flex items-center gap-4">
+			<a
+				href="/"
+				class="size-12 bg-primary rounded-2xl flex items-center justify-center text-white shadow-lg shadow-primary/20 shrink-0 hover:scale-105 transition-transform active:scale-95"
+			>
+				<span class="material-symbols-outlined text-2xl">arrow_back</span>
+			</a>
+			<div class="overflow-hidden">
+				<h1 class="text-xl font-black tracking-tight text-white truncate leading-tight">Settings</h1>
+				<p class="text-[10px] text-primary font-bold uppercase tracking-wider">Configuration</p>
+			</div>
+			<button @click="mobileMenuOpen = false" class="ml-auto md:hidden text-slate-500 hover:text-white p-2 shrink-0">
+				<span class="material-symbols-outlined">close</span>
+			</button>
+		</div>
+	</div>
+}
+
+templ TransfersSidebar(props SidebarProps) {
+	@SidebarLayout(DefaultHeader()) {
+		<nav class="flex-1 px-4 space-y-1.5 overflow-y-auto no-scrollbar py-4">
+			<div class="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] px-4 mb-3 mt-4">Transfers</div>
+			@navItem("all", "layers", "All Torrents", "/list_main?filter=all", props.Filter, props.Counts["all"])
+			@navItem("downloading", "downloading", "Downloading", "/list_main?filter=downloading", props.Filter, props.Counts["downloading"])
+			@navItem("seeding", "upload", "Seeding", "/list_main?filter=seeding", props.Filter, props.Counts["seeding"])
+			@navItem("paused", "pause_circle", "Paused", "/list_main?filter=paused", props.Filter, props.Counts["paused"])
+			if len(props.Labels) > 0 {
+				<div class="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] px-4 mb-3 mt-8">Labels</div>
+				for _, label := range props.Labels {
+					@labelItem(label, props.Filter, props.LabelCounts[label])
+				}
+			}
+		</nav>
+		<div class="px-6 py-4">
+			<button
+				@click="$dispatch('open-add-modal')"
+				class="w-full flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-white font-bold py-3 rounded-xl transition-colors shadow-lg shadow-primary/20 active:scale-[0.98]"
+			>
+				<span class="material-symbols-outlined text-xl">add</span>
+				<span class="text-sm">Add Torrent</span>
+			</button>
+		</div>
+	}
+}
+
+templ SettingsSidebar() {
+	@SidebarLayout(SettingsHeader()) {
+		<nav class="flex-1 px-4 space-y-1.5 overflow-y-auto no-scrollbar py-4">
+			@navItem("settings", "lan", "Connection", "/settings_main", "settings", 0)
+			@navItem("downloads", "download", "Downloads", "#", "", 0)
+			@navItem("bittorrent", "share", "BitTorrent", "#", "", 0)
+			@navItem("folders", "folder", "Folders", "#", "", 0)
+			@navItem("webui", "terminal", "Web UI", "#", "", 0)
+			@navItem("auth", "verified_user", "Authentication", "#", "", 0)
+		</nav>
+	}
+}
+
+templ navItem(id, icon, label, url, currentFilter string, count int) {
+	<a
+		hx-get={ url }
+		hx-target="#main-content"
+		hx-swap="innerHTML"
+		@click={ fmt.Sprintf("activeFilter = '%s'; mobileMenuOpen = false;", id) }
+		:class={ fmt.Sprintf("{ 'bg-white/[0.03] text-primary border-white/5': activeFilter === '%s', 'text-slate-400 hover:bg-white/5 border-transparent': activeFilter !== '%s' }", id, id) }
+		class={ "w-full flex items-center gap-3 px-4 py-3 rounded-xl border transition-colors duration-200 group cursor-pointer", templ.KV("bg-white/[0.03] text-primary border-white/5", currentFilter == id), templ.KV("text-slate-400 hover:bg-white/5 border-transparent", currentFilter != id) }
+	>
+		<span class="material-symbols-outlined text-[20px]">{ icon }</span>
+		<span class="text-[13px] font-bold">{ label }</span>
+		if count > 0 {
+			<span class="ml-auto text-[10px] bg-primary/20 text-primary px-1.5 py-0.5 rounded font-bold">
+				{ fmt.Sprint(count) }
+			</span>
+		}
+	</a>
+}
+
+templ labelItem(label, currentFilter string, count int) {
+	<a
+		hx-get={ fmt.Sprintf("/list_main?filter=label:%s", label) }
+		hx-target="#main-content"
+		hx-swap="innerHTML"
+		@click={ fmt.Sprintf("activeFilter = 'label:%s'; mobileMenuOpen = false;", label) }
+		:class={ fmt.Sprintf("{ 'bg-white/[0.03] text-primary border-white/5': activeFilter === 'label:%s', 'text-slate-400 hover:bg-white/5 border-transparent': activeFilter !== 'label:%s' }", label, label) }
+		class={ "w-full flex items-center gap-3 px-4 py-3 rounded-xl border transition-all duration-200 group cursor-pointer", templ.KV("bg-white/[0.03] text-primary border-white/5", currentFilter == "label:"+label), templ.KV("text-slate-400 hover:bg-white/5 border-transparent", currentFilter != "label:"+label) }
+	>
+		<span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+		<span class="text-[13px] font-bold">{ label }</span>
+		<span class="ml-auto text-[10px] bg-slate-800 text-slate-500 px-1.5 py-0.5 rounded font-bold">
+			{ fmt.Sprint(count) }
+		</span>
+	</a>
+}

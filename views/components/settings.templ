@@ -1,0 +1,139 @@
+package components
+
+templ SettingsPage() {
+	@AppLayout(SettingsSidebar(), "settings", "rTorrent Go Settings") {
+		@SettingsMainArea()
+	}
+}
+
+templ SettingsMainArea() {
+	<main
+		class="flex-1 flex flex-col overflow-hidden"
+		x-data="{
+			defaultPath: localStorage.getItem('defaultDownloadPath') || '/downloads',
+			autoStart: localStorage.getItem('autoStartDownloads') !== 'false',
+			saveSettings() {
+				localStorage.setItem('defaultDownloadPath', this.defaultPath);
+				localStorage.setItem('autoStartDownloads', this.autoStart);
+				// Show success message
+				window.dispatchEvent(new CustomEvent('show-toast', { 
+					detail: { message: 'Settings saved successfully!', type: 'success' } 
+				}));
+			},
+			discardChanges() {
+				this.defaultPath = localStorage.getItem('defaultDownloadPath') || '/downloads';
+				this.autoStart = localStorage.getItem('autoStartDownloads') !== 'false';
+			}
+		}"
+	>
+		<header
+			class="shrink-0 border-b border-slate-800 bg-background-dark/80 backdrop-blur-xl sticky top-0 z-30"
+		>
+			<div class="safe-top"></div>
+			<div class="h-16 flex items-center justify-between px-6 md:px-8">
+				<div class="flex items-center gap-6">
+					<button
+						id="mobile-menu-toggle"
+						@click="mobileMenuOpen = !mobileMenuOpen"
+						class="md:hidden text-slate-500 hover:text-white p-2"
+					>
+						<span class="material-symbols-outlined">menu</span>
+					</button>
+					<h2 class="text-xl font-bold text-white flex items-center gap-3">
+						<span class="material-symbols-outlined text-primary">settings</span>
+						General Settings
+					</h2>
+				</div>
+			</div>
+		</header>
+		<div class="flex-1 overflow-y-auto no-scrollbar p-6 md:p-12">
+			<div class="max-w-3xl mx-auto space-y-12">
+				<section id="general" class="space-y-6">
+					<div class="bg-surface-dark border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+						<div class="p-6 md:p-8 border-b border-slate-800 flex items-center gap-4 bg-white/[0.02]">
+							<div class="size-10 rounded-xl bg-primary/20 flex items-center justify-center">
+								<span class="material-symbols-outlined text-primary">download</span>
+							</div>
+							<div>
+								<h3 class="text-white font-bold">Download Preferences</h3>
+								<p class="text-xs text-slate-500">Configure default paths and behavior for new torrents.</p>
+							</div>
+						</div>
+						<div class="p-6 md:p-8 space-y-8">
+							<div class="space-y-3">
+								<label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Default Save Path</label>
+								<input
+									type="text"
+									x-model="defaultPath"
+									class="w-full bg-background-dark border border-slate-800 rounded-xl px-4 py-3.5 text-sm text-slate-300 focus:ring-1 focus:ring-primary focus:border-transparent outline-none transition-all font-mono"
+									placeholder="/downloads"
+								/>
+								<p class="text-[11px] text-slate-600 italic px-1">Tip: This is the directory where files will be stored by default.</p>
+							</div>
+							<div class="pt-2">
+								<label class="flex items-center gap-4 cursor-pointer group">
+									<div class="relative flex items-center">
+										<input
+											type="checkbox"
+											x-model="autoStart"
+											class="peer h-6 w-6 cursor-pointer appearance-none rounded-lg border border-slate-800 bg-background-dark checked:border-primary checked:bg-primary transition-all"
+										/>
+										<span class="material-symbols-outlined absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-[18px] text-white opacity-0 peer-checked:opacity-100 pointer-events-none">check</span>
+									</div>
+									<div>
+										<span class="text-sm font-bold text-slate-300 group-hover:text-white transition-colors">Start downloads automatically</span>
+										<p class="text-xs text-slate-500 mt-0.5">Torrents will begin downloading immediately after being added.</p>
+									</div>
+								</label>
+							</div>
+						</div>
+					</div>
+					<div class="bg-surface-dark border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+						<div class="p-6 md:p-8 border-b border-slate-800 flex items-center gap-4 bg-white/[0.02]">
+							<div class="size-10 rounded-xl bg-emerald-500/20 flex items-center justify-center">
+								<span class="material-symbols-outlined text-emerald-500">speed</span>
+							</div>
+							<div>
+								<h3 class="text-white font-bold">Global Speed Limits</h3>
+								<p class="text-xs text-slate-500">Manage bandwidth usage across all active torrents.</p>
+							</div>
+						</div>
+						<div class="p-6 md:p-8 grid grid-cols-1 sm:grid-cols-2 gap-8">
+							<div class="space-y-3">
+								<label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 text-blue-400">Download (KB/s)</label>
+								<div class="relative">
+									<input type="number" value="0" class="w-full bg-background-dark border border-slate-800 rounded-xl pl-4 pr-12 py-3.5 text-sm text-slate-300 focus:ring-1 focus:ring-blue-500 focus:border-transparent outline-none transition-all"/>
+									<span class="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-600 uppercase">KB/s</span>
+								</div>
+								<p class="text-[10px] text-slate-600 px-1">Enter 0 for unlimited speed</p>
+							</div>
+							<div class="space-y-3">
+								<label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 text-emerald-400">Upload (KB/s)</label>
+								<div class="relative">
+									<input type="number" value="0" class="w-full bg-background-dark border border-slate-800 rounded-xl pl-4 pr-12 py-3.5 text-sm text-slate-300 focus:ring-1 focus:ring-emerald-500 focus:border-transparent outline-none transition-all"/>
+									<span class="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-600 uppercase">KB/s</span>
+								</div>
+							</div>
+						</div>
+					</div>
+				</section>
+				<!-- Save Bar -->
+				<div class="flex flex-col sm:flex-row justify-end gap-3 pt-4 safe-bottom">
+					<button
+						@click="discardChanges()"
+						class="px-8 py-3.5 rounded-xl text-sm font-bold text-slate-400 hover:text-white hover:bg-white/5 transition-all"
+					>
+						Discard Changes
+					</button>
+					<button
+						@click="saveSettings()"
+						class="px-10 py-3.5 rounded-xl bg-primary text-white text-sm font-black uppercase tracking-widest shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all active:scale-[0.98] flex items-center justify-center gap-3"
+					>
+						<span class="material-symbols-outlined text-[18px]">save</span>
+						Apply Settings
+					</button>
+				</div>
+			</div>
+		</div>
+	</main>
+}

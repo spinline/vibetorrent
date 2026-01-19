@@ -1,0 +1,268 @@
+package components
+
+import (
+	"fmt"
+	"rtorrent-go/internal/rtorrent"
+)
+
+templ DetailDrawer() {
+	<div x-data="{ open: false }" @open-drawer.window="open = true" @close-drawer.window="open = false" x-cloak x-show="open" class="relative z-50">
+		<!-- Backdrop -->
+		<div
+			x-show="open"
+			x-transition:enter="transition ease-out duration-300"
+			x-transition:enter-start="opacity-0"
+			x-transition:enter-end="opacity-100"
+			x-transition:leave="transition ease-in duration-200"
+			x-transition:leave-start="opacity-100"
+			x-transition:leave-end="opacity-0"
+			class="fixed inset-0 bg-black/50 backdrop-blur-sm"
+			@click="open = false"
+		></div>
+		<!-- Drawer -->
+		<div
+			id="detail-drawer"
+			:class="open ? 'translate-x-0' : 'translate-x-full'"
+			class="fixed top-0 right-0 bottom-0 w-full md:w-[648px] bg-surface-dark border-l border-slate-800 flex flex-col shadow-2xl transition-transform duration-300 ease-in-out"
+		>
+			<div class="safe-top bg-background-dark/50 backdrop-blur-md"></div>
+			<div class="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-background-dark shrink-0">
+				<h2 class="text-sm font-bold text-slate-400 uppercase tracking-[0.2em]">Torrent Details</h2>
+				<button @click="open = false" class="text-slate-500 hover:text-white transition-colors p-2 hover:bg-slate-800 rounded-full">
+					<span class="material-symbols-outlined">close</span>
+				</button>
+			</div>
+			<div id="drawer-content" class="flex-1 overflow-y-auto no-scrollbar safe-bottom">
+				<!-- Content will be swapped here by HTMX -->
+			</div>
+		</div>
+	</div>
+}
+
+templ DetailContent(torrent rtorrent.Torrent, files []rtorrent.File) {
+	<div x-data="{ activeTab: 'overview' }" class="flex flex-col min-h-full bg-background-dark">
+		<!-- Hero Section -->
+		<div class="p-8 pb-0 flex flex-col items-center bg-background-dark">
+			<!-- Close Button (Absolute) - Assuming close button is handled by parent -->
+			<!-- Circular Progress -->
+			<div class="relative size-48 mb-6">
+				<svg class="size-full -rotate-90" viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg">
+					<!-- Track -->
+					<path class="text-slate-800" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3"></path>
+					<!-- Progress -->
+					<path class="text-primary drop-shadow-[0_0_10px_rgba(18,161,161,0.4)]" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray={ fmt.Sprintf("%.1f, 100", torrent.Progress) } stroke-linecap="round" stroke-width="3"></path>
+				</svg>
+				<div class="absolute inset-0 flex items-center justify-center flex-col">
+					<span class="text-5xl font-bold text-white tracking-tighter">
+						{ fmt.Sprintf("%.0f", torrent.Progress) }<span class="text-2xl text-primary">%</span>
+					</span>
+					<span class="text-[10px] font-bold uppercase tracking-widest mt-2 text-primary">
+						{ torrent.State }
+					</span>
+				</div>
+			</div>
+			<h2 class="text-xl font-bold text-center text-white mb-2 px-4 leading-tight break-words max-w-full">{ torrent.Name }</h2>
+			<div class="text-[10px] text-slate-500 font-mono mb-8 uppercase tracking-wider">HASH: <span class="text-slate-600">{ torrent.Hash }</span></div>
+			<!-- Action Buttons -->
+			<div class="flex items-center gap-6 w-full justify-center mb-10">
+				if torrent.State == "paused" {
+					<button class="flex flex-col items-center gap-2 group">
+						<div class="size-12 rounded-full bg-slate-800 group-hover:bg-primary/20 text-slate-400 group-hover:text-primary flex items-center justify-center transition-all">
+							<span class="material-symbols-outlined !text-[24px]">play_arrow</span>
+						</div>
+						<span class="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Start</span>
+					</button>
+				} else {
+					<button class="flex flex-col items-center gap-2 group">
+						<div class="size-12 rounded-full bg-slate-800 group-hover:bg-primary/20 text-slate-400 group-hover:text-primary flex items-center justify-center transition-all">
+							<span class="material-symbols-outlined !text-[24px]">pause</span>
+						</div>
+						<span class="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Pause</span>
+					</button>
+				}
+				<button
+					class="flex flex-col items-center gap-2 group"
+					hx-delete={ fmt.Sprintf("/torrent/%s", torrent.Hash) }
+					hx-target="#app-container"
+					@click="$dispatch('close-drawer')"
+				>
+					<div class="size-12 rounded-full bg-slate-800 group-hover:bg-red-500/20 text-slate-400 group-hover:text-red-500 flex items-center justify-center transition-all">
+						<span class="material-symbols-outlined !text-[24px]">delete</span>
+					</div>
+					<span class="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Delete</span>
+				</button>
+				<button class="flex flex-col items-center gap-2 group">
+					<div class="size-12 rounded-full bg-slate-800 group-hover:bg-primary/20 text-slate-400 group-hover:text-primary flex items-center justify-center transition-all">
+						<span class="material-symbols-outlined !text-[24px]">sync</span>
+					</div>
+					<span class="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Recheck</span>
+				</button>
+				<button class="flex flex-col items-center gap-2 group">
+					<div class="size-12 rounded-full bg-slate-800 group-hover:bg-primary/20 text-slate-400 group-hover:text-primary flex items-center justify-center transition-all">
+						<span class="material-symbols-outlined !text-[24px]">settings</span>
+					</div>
+					<span class="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Options</span>
+				</button>
+			</div>
+			<!-- Tabs -->
+			<div class="flex border-b border-slate-800 w-full px-2">
+				<button
+					@click="activeTab = 'overview'"
+					:class="activeTab === 'overview' ? 'text-primary border-primary' : 'text-slate-500 hover:text-slate-300 border-transparent'"
+					class="py-3 px-4 text-[11px] font-bold uppercase tracking-widest border-b-2 transition-colors"
+				>Overview</button>
+				<button
+					@click="activeTab = 'files'"
+					:class="activeTab === 'files' ? 'text-primary border-primary' : 'text-slate-500 hover:text-slate-300 border-transparent'"
+					class="py-3 px-4 text-[11px] font-bold uppercase tracking-widest border-b-2 transition-colors"
+				>Files <span class="bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded ml-1 text-[9px]">{ fmt.Sprint(len(files)) }</span></button>
+				<button
+					@click="activeTab = 'peers'"
+					:class="activeTab === 'peers' ? 'text-primary border-primary' : 'text-slate-500 hover:text-slate-300 border-transparent'"
+					class="py-3 px-4 text-[11px] font-bold uppercase tracking-widest border-b-2 transition-colors"
+				>Peers <span class="bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded ml-1 text-[9px]">0</span></button>
+				<button
+					@click="activeTab = 'graph'"
+					:class="activeTab === 'graph' ? 'text-primary border-primary' : 'text-slate-500 hover:text-slate-300 border-transparent'"
+					class="py-3 px-4 text-[11px] font-bold uppercase tracking-widest border-b-2 transition-colors"
+				>Graph</button>
+			</div>
+		</div>
+		<!-- Tab Content -->
+		<div class="flex-1 overflow-y-auto no-scrollbar bg-background-dark p-8">
+			<!-- Overview Tab -->
+			<div x-show="activeTab === 'overview'" class="flex flex-col space-y-8">
+				<!-- Stats Grid -->
+				<div class="grid grid-cols-2 gap-y-6 gap-x-8">
+					<div>
+						<p class="text-[10px] text-slate-500 uppercase font-bold mb-1 tracking-wider">Total Size</p>
+						<p class="text-sm text-slate-200 font-mono font-medium">{ FormatBytes(torrent.Size) }</p>
+					</div>
+					<div>
+						<p class="text-[10px] text-slate-500 uppercase font-bold mb-1 tracking-wider">Date Added</p>
+						<p class="text-sm text-slate-200 font-mono font-medium">{ FormatDate(torrent.DateAdded) }</p>
+					</div>
+					<div>
+						<p class="text-[10px] text-slate-500 uppercase font-bold mb-1 tracking-wider">Share Ratio</p>
+						<p class="text-sm text-primary font-bold font-mono">1.45</p>
+					</div>
+					<div>
+						<p class="text-[10px] text-slate-500 uppercase font-bold mb-1 tracking-wider">Uploaded</p>
+						<p class="text-sm text-slate-200 font-mono font-medium">{ FormatBytes(int64(torrent.UploadRate * 3600)) } (Est)</p>
+					</div>
+					<div>
+						<p class="text-[10px] text-slate-500 uppercase font-bold mb-1 tracking-wider">Piece Count</p>
+						<p class="text-sm text-slate-200 font-mono font-medium">{ fmt.Sprint(torrent.PieceCount) }</p>
+					</div>
+					<div>
+						<p class="text-[10px] text-slate-500 uppercase font-bold mb-1 tracking-wider">Piece Size</p>
+						<p class="text-sm text-slate-200 font-mono font-medium">{ FormatBytes(torrent.PieceSize) }</p>
+					</div>
+				</div>
+				<!-- Save Path -->
+				<div>
+					<p class="text-[10px] text-slate-500 uppercase font-bold mb-2 tracking-wider">Save Path</p>
+					<div class="bg-surface-dark border border-slate-800 rounded p-3">
+						<p class="text-xs text-slate-400 font-mono break-all">{ torrent.SavePath }</p>
+					</div>
+				</div>
+				<!-- Current Speed / Graph -->
+				<div class="pt-4 border-t border-slate-800/50">
+					<div class="flex justify-between items-end mb-4">
+						<span class="text-xs font-bold text-slate-400">Current Speed</span>
+						<div class="text-right">
+							<span class="text-xl font-bold text-primary">{ FormatSpeed(torrent.DownloadRate) }</span>
+							<div class="text-[10px] text-slate-600 uppercase">DL Limit: None</div>
+						</div>
+					</div>
+					<!-- Simulated Bar Chart -->
+					<div class="h-16 flex items-end gap-1 overflow-hidden opacity-80">
+						for i := 0; i < 40; i++ {
+							<div class="flex-1 bg-primary/20 hover:bg-primary transition-colors rounded-t-sm" style={ fmt.Sprintf("height: %d%%", (i*7+23)%90+10) }></div>
+						}
+					</div>
+				</div>
+				<!-- Files Preview (Mini) -->
+				<div>
+					<div class="flex justify-between items-center mb-3">
+						<span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Files Preview</span>
+						<button @click="activeTab = 'files'" class="text-[10px] text-primary hover:text-white transition-colors cursor-pointer">View All</button>
+					</div>
+					<div class="bg-surface-dark border border-slate-800 rounded-lg overflow-hidden">
+						for i, file := range files {
+							if i < 3 {
+								<div class="p-3 border-b border-slate-800 last:border-0 flex items-center justify-between">
+									<div class="flex items-center gap-3 overflow-hidden">
+										<span class="material-symbols-outlined text-slate-600 text-lg">description</span>
+										<span class="text-xs text-slate-300 truncate">{ file.Name }</span>
+									</div>
+									<span class="text-[10px] text-slate-500 font-mono whitespace-nowrap ml-4">{ FormatBytes(file.Size) }</span>
+								</div>
+							}
+						}
+					</div>
+				</div>
+			</div>
+			<!-- Files Tab (Full) -->
+			<div x-show="activeTab === 'files'" class="flex flex-col">
+				<div class="bg-surface-dark border border-slate-800 rounded-lg overflow-hidden">
+					<table class="w-full text-left border-collapse">
+						<thead class="bg-slate-900/50 border-b border-slate-800">
+							<tr>
+								<th class="px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider">File Name</th>
+								<th class="px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-right">Size</th>
+								<th class="px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-right">Progress</th>
+							</tr>
+						</thead>
+						<tbody class="divide-y divide-slate-800/50">
+							for _, file := range files {
+								<tr class="hover:bg-slate-800/30 transition-colors">
+									<td class="px-4 py-3 text-xs text-slate-300 truncate max-w-[200px]" title={ file.Name }>{ file.Name }</td>
+									<td class="px-4 py-3 text-right text-slate-400 font-mono text-[10px]">{ FormatBytes(file.Size) }</td>
+									<td class="px-4 py-3 text-right text-primary font-bold text-[10px]">
+										if file.Size > 0 {
+											{ fmt.Sprintf("%.0f%%", float64(file.Completed)/float64(file.Size)*100) }
+										} else {
+											0%
+										}
+									</td>
+								</tr>
+							}
+						</tbody>
+					</table>
+				</div>
+			</div>
+			<!-- Other Tabs -->
+			<div x-show="activeTab === 'peers'" class="flex flex-col items-center justify-center py-12 text-slate-500">
+				<span class="material-symbols-outlined text-4xl mb-4 opacity-30">group</span>
+				<p class="text-sm">No connected peers</p>
+			</div>
+			<div x-show="activeTab === 'graph'" class="flex flex-col items-center justify-center py-12 text-slate-500">
+				<span class="material-symbols-outlined text-4xl mb-4 opacity-30">monitoring</span>
+				<p class="text-sm">Extended Graph View</p>
+			</div>
+		</div>
+	</div>
+}
+
+func getProgressStrokeColor(state string) string {
+	switch state {
+	case "seeding":
+		return "text-emerald-500"
+	case "paused":
+		return "text-orange-500"
+	default:
+		return "text-primary"
+	}
+}
+
+func getProgressTextColor(state string) string {
+	switch state {
+	case "seeding":
+		return "text-emerald-500"
+	case "paused":
+		return "text-orange-500"
+	default:
+		return "text-primary"
+	}
+}

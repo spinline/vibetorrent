@@ -1,0 +1,31 @@
+[Unit]
+Description=rTorrent Web UI
+Documentation=https://github.com/yourusername/rtorrent-webui
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/usr/local/bin
+
+# Environment configuration
+Environment="RTORRENT_SOCKET=unix:///opt/var/rpc.socket"
+Environment="PORT=8080"
+
+# Start the web UI
+ExecStart=/usr/local/bin/rtorrent-webui
+
+# Restart policy
+Restart=on-failure
+RestartSec=5s
+
+# Security
+NoNewPrivileges=true
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=rtorrent-webui
+
+[Install]
+WantedBy=multi-user.target
