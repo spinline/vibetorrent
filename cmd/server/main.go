@@ -421,6 +421,12 @@ func renderDashboardMainArea(w http.ResponseWriter, r *http.Request, client rtor
 				order = parts[1]
 			}
 		}
+	} else {
+		http.SetCookie(w, &http.Cookie{
+			Name:  "torrent_sort",
+			Value: sortBy + ":" + order,
+			Path:  "/",
+		})
 	}
 
 	var stats components.Stats
