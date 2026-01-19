@@ -24,6 +24,19 @@ templ Base(title string) {
 			// Tailwind CSS
 			<script src="https://cdn.tailwindcss.com"></script>
 			<script>
+		document.addEventListener('htmx:beforeRequest', function(evt) {
+			const scrollContainer = document.getElementById('torrent-table-scroll-container');
+			if (scrollContainer) {
+				window.lastTableScroll = scrollContainer.scrollLeft;
+			}
+		});
+		document.addEventListener('htmx:afterSettle', function(evt) {
+			const scrollContainer = document.getElementById('torrent-table-scroll-container');
+			if (scrollContainer && window.lastTableScroll !== undefined) {
+				scrollContainer.scrollLeft = window.lastTableScroll;
+			}
+		});
+
 		tailwind.config = {
 			theme: {
 				extend: {
