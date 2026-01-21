@@ -61,6 +61,10 @@ templ DashboardMainArea(props DashboardProps) {
 							type="text"
 							placeholder="Filter torrents..."
 							class="w-full bg-surface-dark border-none rounded-lg pl-9 pr-4 py-1.5 text-xs text-slate-300 focus:ring-1 focus:ring-primary"
+							x-data="{ query: '', timeout: null }"
+							x-model="query"
+							@input="clearTimeout(timeout); timeout = setTimeout(() => { htmx.ajax('GET', '/list?filter=' + encodeURIComponent(activeFilter) + '&search=' + encodeURIComponent(query), '#torrent-list'); }, 300)"
+							@keydown.escape="query = ''; htmx.ajax('GET', '/list?filter=' + encodeURIComponent(activeFilter), '#torrent-list');"
 						/>
 					</div>
 				</div>

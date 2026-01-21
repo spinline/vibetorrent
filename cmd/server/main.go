@@ -348,6 +348,9 @@ func main() {
 
 		sortTorrents(torrents, sortBy, order)
 
+		// Get search query
+		search := strings.ToLower(strings.TrimSpace(r.URL.Query().Get("search")))
+
 		var filtered []rtorrent.Torrent
 		for _, t := range torrents {
 			shouldInclude := false
@@ -361,6 +364,15 @@ func main() {
 					shouldInclude = t.Label == filter[6:]
 				}
 			}
+			
+			// Apply search filter
+			if shouldInclude && search != "" {
+				nameLower := strings.ToLower(t.Name)
+				if !strings.Contains(nameLower, search) {
+					shouldInclude = false
+				}
+			}
+			
 			if shouldInclude {
 				filtered = append(filtered, t)
 			}
