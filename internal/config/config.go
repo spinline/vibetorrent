@@ -112,8 +112,10 @@ func LoadConfig() (*Config, error) {
 	if !configExists {
 		if err := createDefaultConfig(configPath); err != nil {
 			// Log error but don't fail - we can still run with defaults
-			fmt.Printf("Warning: Could not create config file: %v\n", err)
+			fmt.Printf("⚠️  Warning: Could not create config file: %v\n", err)
 		}
+	} else {
+		fmt.Printf("✓ Loaded config from: %s\n", configPath)
 	}
 
 	AppConfig = &config

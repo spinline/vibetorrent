@@ -37,9 +37,17 @@ When you run VibeTorrent for the first time, you'll see a setup wizard:
 Visit `http://localhost:8080` and configure:
 - rTorrent connection (Unix socket or TCP)
 - Download paths
+- Download paths
 - Other preferences
 
-The configuration will be saved to `~/.config/vibetorrent/config.yaml`
+The configuration will be saved to:
+- **Linux/Mac**: `~/.config/vibetorrent/config.yaml`
+- **Current Directory**: `./config.yaml` (fallback)
+
+You can also set a custom location:
+```bash
+VIBETORRENT_CONFIG=/path/to/config.yaml ./vibetorrent
+```
 
 ### Using Environment Variables
 
