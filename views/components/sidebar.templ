@@ -90,10 +90,10 @@ templ TransfersSidebar(props SidebarProps) {
 	@SidebarLayout(DefaultHeader()) {
 		<nav class="flex-1 px-4 space-y-1.5 overflow-y-auto no-scrollbar py-4">
 			<div class="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] px-4 mb-3 mt-4">Transfers</div>
-			@navItem("all", "layers", "All Torrents", "/list_main?filter=all", props.Filter, props.Counts["all"])
-			@navItem("downloading", "downloading", "Downloading", "/list_main?filter=downloading", props.Filter, props.Counts["downloading"])
-			@navItem("seeding", "upload", "Seeding", "/list_main?filter=seeding", props.Filter, props.Counts["seeding"])
-			@navItem("paused", "pause_circle", "Paused", "/list_main?filter=paused", props.Filter, props.Counts["paused"])
+			@navItem("all", "layers", "All Torrents", "/list?filter=all", props.Filter, props.Counts["all"])
+			@navItem("downloading", "downloading", "Downloading", "/list?filter=downloading", props.Filter, props.Counts["downloading"])
+			@navItem("seeding", "upload", "Seeding", "/list?filter=seeding", props.Filter, props.Counts["seeding"])
+			@navItem("paused", "pause_circle", "Paused", "/list?filter=paused", props.Filter, props.Counts["paused"])
 			if len(props.Labels) > 0 {
 				<div class="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] px-4 mb-3 mt-8">Labels</div>
 				for _, label := range props.Labels {
@@ -129,8 +129,8 @@ templ SettingsSidebar() {
 templ navItem(id, icon, label, url, currentFilter string, count int) {
 	<a
 		hx-get={ url }
-		hx-target="#main-content"
-		hx-swap="innerHTML"
+		hx-target="#torrent-list"
+		hx-swap="outerHTML"
 		@click={ fmt.Sprintf("activeFilter = '%s'; mobileMenuOpen = false;", id) }
 		:class={ fmt.Sprintf("{ 'bg-white/[0.03] text-primary border-white/5': activeFilter === '%s', 'text-slate-400 hover:bg-white/5 border-transparent': activeFilter !== '%s' }", id, id) }
 		class={ "w-full flex items-center gap-3 px-4 py-3 rounded-xl border transition-colors duration-200 group cursor-pointer", templ.KV("bg-white/[0.03] text-primary border-white/5", currentFilter == id), templ.KV("text-slate-400 hover:bg-white/5 border-transparent", currentFilter != id) }
@@ -147,9 +147,9 @@ templ navItem(id, icon, label, url, currentFilter string, count int) {
 
 templ labelItem(label, currentFilter string, count int) {
 	<a
-		hx-get={ fmt.Sprintf("/list_main?filter=label:%s", label) }
-		hx-target="#main-content"
-		hx-swap="innerHTML"
+		hx-get={ fmt.Sprintf("/list?filter=label:%s", label) }
+		hx-target="#torrent-list"
+		hx-swap="outerHTML"
 		@click={ fmt.Sprintf("activeFilter = 'label:%s'; mobileMenuOpen = false;", label) }
 		:class={ fmt.Sprintf("{ 'bg-white/[0.03] text-primary border-white/5': activeFilter === 'label:%s', 'text-slate-400 hover:bg-white/5 border-transparent': activeFilter !== 'label:%s' }", label, label) }
 		class={ "w-full flex items-center gap-3 px-4 py-3 rounded-xl border transition-all duration-200 group cursor-pointer", templ.KV("bg-white/[0.03] text-primary border-white/5", currentFilter == "label:"+label), templ.KV("text-slate-400 hover:bg-white/5 border-transparent", currentFilter != "label:"+label) }

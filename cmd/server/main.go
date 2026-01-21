@@ -54,14 +54,6 @@ func main() {
 		renderDashboardContainer(w, r, client, filter)
 	})
 
-	r.Get("/list_main", func(w http.ResponseWriter, r *http.Request) {
-		filter := r.URL.Query().Get("filter")
-		if filter == "" {
-			filter = "all"
-		}
-		renderDashboardMainArea(w, r, client, filter)
-	})
-
 	r.Delete("/torrent/{hash}", func(w http.ResponseWriter, r *http.Request) {
 		hash := chi.URLParam(r, "hash")
 		// Check for deleteFiles parameter
