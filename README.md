@@ -13,6 +13,7 @@ Modern, high-performance web interface for rTorrent built with Go and the GOTH s
 - ➕ **Easy Management** - Add, pause, resume, and remove torrents
 - 🐳 **Docker Support** - Easy setup with Docker Compose
 - 📱 **PWA Ready** - Install as a progressive web app
+- ⚙️ **Easy Configuration** - Setup wizard on first run + YAML config file
 
 ## Tech Stack (GOTH)
 
@@ -21,8 +22,36 @@ Modern, high-performance web interface for rTorrent built with Go and the GOTH s
 - **HTMX** - Dynamic interactions without JavaScript frameworks
 - **Alpine.js** - Lightweight reactivity for UI components
 - **Tailwind CSS** - Modern styling
+- **Viper** - Flexible configuration management
 
 ## Quick Start
+
+### First Run (Setup Wizard)
+
+When you run VibeTorrent for the first time, you'll see a setup wizard:
+
+```bash
+./vibetorrent
+```
+
+Visit `http://localhost:8080` and configure:
+- rTorrent connection (Unix socket or TCP)
+- Download paths
+- Other preferences
+
+The configuration will be saved to `~/.config/vibetorrent/config.yaml`
+
+### Using Environment Variables
+
+You can also configure via environment variables (they override the config file):
+
+```bash
+# Unix socket connection
+RTORRENT_SOCKET=unix:///opt/var/rpc.socket PORT=8080 ./vibetorrent
+
+# TCP connection  
+RTORRENT_SOCKET=tcp://localhost:5000 PORT=8080 ./vibetorrent
+```
 
 ### Prerequisites
 

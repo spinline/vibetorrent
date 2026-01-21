@@ -3,10 +3,11 @@ package main
 import (
 	"embed"
 	"encoding/json"
+	"fmt"
 	"io/fs"
 	"log"
 	"net/http"
-	"os"
+	"rtorrent-go/internal/config"
 	"rtorrent-go/internal/rtorrent"
 	"rtorrent-go/views/components"
 	"sort"
@@ -22,29 +23,119 @@ import (
 var assets embed.FS
 
 func main() {
+	// Load configuration
+	cfg, err := config.LoadConfig()
+	if err != nil {
+		log.Fatalf("Failed to load config: %v", err)
+	}
+
+	log.Printf("✓ Configuration loaded successfully")
+	if cfg.RTorrent.Socket != "" {
+		log.Printf("  rTorrent Socket: %s", cfg.RTorrent.Socket)
+	}
+	log.Printf("  Server: %s:%d", cfg.Server.Host, cfg.Server.Port)
+
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 
-	// Determine rTorrent connection address
-	// Priority: RTORRENT_SOCKET > RTORRENT_HOST:RTORRENT_PORT
-	addr := os.Getenv("RTORRENT_SOCKET")
-	if addr == "" {
-		host := os.Getenv("RTORRENT_HOST")
-		if host == "" {
-			host = "localhost"
+	// Check if rTorrent is configured
+	var client rtorrent.Client
+	if config.IsRTorrentConfigured() {
+		client = rtorrent.NewClient(cfg.RTorrent.Socket)
+		// Test connection
+		if err := client.TestConnection(); err != nil {
+			log.Printf("⚠ Warning: Cannot connect to rTorrent: %v", err)
+			log.Printf("  Starting in setup mode...")
+			client = nil
 		}
-		port := os.Getenv("RTORRENT_PORT")
-		if port == "" {
-			port = "8000"
-		}
-		addr = host + ":" + port
 	}
 
-	client := rtorrent.NewClient(addr)
+	// Middleware to check if setup is required
+	r.Use(func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			// Skip setup check for setup routes and assets
+			if strings.HasPrefix(r.URL.Path, "/setup") || strings.HasPrefix(r.URL.Path, "/assets") {
+				next.ServeHTTP(w, r)
+				return
+			}
+
+			// Check if client is nil (not configured or connection failed)
+			if client == nil {
+				http.Redirect(w, r, "/setup", http.StatusTemporaryRedirect)
+				return
+			}
+
+			next.ServeHTTP(w, r)
+		})
+	})
 
 	assetFS, _ := fs.Sub(assets, "assets")
 	r.Handle("/assets/*", http.StripPrefix("/assets/", http.FileServer(http.FS(assetFS))))
+
+	// Setup routes
+	r.Get("/setup", func(w http.ResponseWriter, r *http.Request) {
+		components.SetupPage("").Render(r.Context(), w)
+	})
+
+	r.Post("/setup", func(w http.ResponseWriter, r *http.Request) {
+		if err := r.ParseForm(); err != nil {
+			components.SetupPage("Invalid form data").Render(r.Context(), w)
+			return
+		}
+
+		// Build socket string based on type
+		socketType := r.FormValue("socket_type")
+		var socket string
+
+		if socketType == "unix" {
+			unixSocket := r.FormValue("unix_socket")
+			if unixSocket == "" {
+				components.SetupPage("Unix socket path is required").Render(r.Context(), w)
+				return
+			}
+			socket = "unix://" + unixSocket
+		} else {
+			host := r.FormValue("tcp_host")
+			port := r.FormValue("tcp_port")
+			if host == "" || port == "" {
+				components.SetupPage("Host and port are required for TCP connection").Render(r.Context(), w)
+				return
+			}
+			socket = "tcp://" + host + ":" + port
+		}
+
+		// Update config
+		cfg.RTorrent.Socket = socket
+
+		// Update download paths if provided
+		if defaultPath := r.FormValue("default_path"); defaultPath != "" {
+			cfg.Downloads.DefaultPath = defaultPath
+		}
+		if tempPath := r.FormValue("temp_path"); tempPath != "" {
+			cfg.Downloads.TempPath = tempPath
+		}
+
+		// Test connection
+		testClient := rtorrent.NewClient(socket)
+		if err := testClient.TestConnection(); err != nil {
+			components.SetupPage(fmt.Sprintf("Cannot connect to rTorrent: %v", err)).Render(r.Context(), w)
+			return
+		}
+
+		// Save config
+		if err := config.SaveConfig(); err != nil {
+			components.SetupPage(fmt.Sprintf("Failed to save config: %v", err)).Render(r.Context(), w)
+			return
+		}
+
+		// Update global client
+		client = testClient
+
+		// Redirect to dashboard
+		w.Header().Set("HX-Redirect", "/")
+		w.WriteHeader(http.StatusOK)
+	})
 
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		filter := r.URL.Query().Get("filter")
@@ -251,12 +342,9 @@ func main() {
 		components.TorrentTable(filtered, sortBy, order, filter).Render(r.Context(), w)
 	})
 
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-	}
-	log.Printf("Server starting on :%s...", port)
-	if err := http.ListenAndServe(":"+port, r); err != nil {
+	addr := fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port)
+	log.Printf("🚀 VibeTorrent server starting on %s...", addr)
+	if err := http.ListenAndServe(addr, r); err != nil {
 		log.Fatal(err)
 	}
 }

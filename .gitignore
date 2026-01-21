@@ -1,5 +1,6 @@
 # Go binary
 rtorrent-webui
+vibetorrent
 
 # Templ generated files
 *_templ.go
@@ -7,6 +8,9 @@ rtorrent-webui
 # System files
 *.log
 .DS_Store
+
+# Configuration (created by app)
+config.yaml
 
 # Docker volumes
 docker/data/

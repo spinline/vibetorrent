@@ -156,6 +156,7 @@ type File struct {
 }
 
 type Client interface {
+	TestConnection() error
 	GetTorrents(ctx context.Context) ([]Torrent, error)
 	DeleteTorrent(ctx context.Context, hash string) error
 	GetTorrentFiles(ctx context.Context, hash string) ([]File, error)
@@ -186,6 +187,10 @@ type xmlrpcClient struct {
 }
 
 type mockClient struct{}
+
+func (m *mockClient) TestConnection() error {
+	return nil
+}
 
 func (m *mockClient) GetTorrents(ctx context.Context) ([]Torrent, error) {
 	return []Torrent{
@@ -323,6 +328,18 @@ func (c *xmlrpcClient) call(ctx context.Context, method string, args ...Value) (
 	}
 
 	return &methodResp, nil
+}
+
+func (c *xmlrpcClient) TestConnection() error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	// Try to get rTorrent client version
+	_, err := c.call(ctx, "system.client_version")
+	if err != nil {
+		return fmt.Errorf("connection test failed: %w", err)
+	}
+	return nil
 }
 
 func (c *xmlrpcClient) GetTorrents(ctx context.Context) ([]Torrent, error) {
