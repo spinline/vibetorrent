@@ -129,6 +129,20 @@ templ ContextMenu() {
 				showLabelModal: false,
 				labelInput: '',
 
+				getActiveFilter() {
+					// Get activeFilter from parent Alpine.js scope (dashboard)
+					const dashboard = document.querySelector('[x-data*="activeFilter"]');
+					if (dashboard && dashboard._x_dataStack) {
+						return dashboard._x_dataStack[0].activeFilter || 'all';
+					}
+					return 'all';
+				},
+
+				refreshList() {
+					const filter = this.getActiveFilter();
+					htmx.ajax('GET', '/list?filter=' + encodeURIComponent(filter), '#torrent-list');
+				},
+
 				openAt(x, y, hash, name, priority) {
 					this.activeHash = hash;
 					this.activeName = name;
@@ -275,16 +289,18 @@ templ ContextMenu() {
 					}
 					if (action === 'remove') {
 						if(confirm('Are you sure you want to remove this torrent?')) {
+							const self = this;
 							fetch(`/torrent/${hash}`, { method: 'DELETE' })
-								.then(() => htmx.ajax('GET', '/list?filter=all', '#torrent-list'));
+								.then(() => self.refreshList());
 						}
 						this.close();
 						return;
 					}
 					if (action === 'removeWithData') {
 						if(confirm('Are you sure you want to remove this torrent and DELETE ALL DATA?')) {
+							const self = this;
 							fetch(`/torrent/${hash}?deleteFiles=true`, { method: 'DELETE' })
-								.then(() => htmx.ajax('GET', '/list?filter=all', '#torrent-list'));
+								.then(() => self.refreshList());
 						}
 						this.close();
 						return;
@@ -293,8 +309,8 @@ templ ContextMenu() {
 					// Use fetch to trigger server actions
 					try {
 						await fetch(url, { method });
-						// Refresh the table via HTMX event
-						htmx.ajax('GET', '/list?filter=all', '#torrent-list');
+						// Refresh the table with current filter
+						this.refreshList();
 					} catch (e) {
 						console.error(e);
 					}
@@ -312,7 +328,7 @@ templ ContextMenu() {
 							headers: { 'Content-Type': 'application/json' },
 							body: JSON.stringify({ priority: parseInt(priority) })
 						});
-						htmx.ajax('GET', '/list?filter=all', '#torrent-list');
+						this.refreshList();
 					} catch (e) {
 						console.error(e);
 					}
@@ -329,7 +345,7 @@ templ ContextMenu() {
 							headers: { 'Content-Type': 'application/json' },
 							body: JSON.stringify({ label: this.labelInput })
 						});
-						htmx.ajax('GET', '/list?filter=all', '#torrent-list');
+						this.refreshList();
 					} catch (e) {
 						console.error(e);
 					}
