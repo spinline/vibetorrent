@@ -129,7 +129,7 @@ templ SettingsSidebar() {
 templ navItem(id, icon, label, url, currentFilter string, count int) {
 	<a
 		hx-get={ url }
-		hx-target="#main-content"
+		hx-target="#torrent-list"
 		hx-swap="innerHTML"
 		@click={ fmt.Sprintf("activeFilter = '%s'; mobileMenuOpen = false;", id) }
 		:class={ fmt.Sprintf("{ 'bg-white/[0.03] text-primary border-white/5': activeFilter === '%s', 'text-slate-400 hover:bg-white/5 border-transparent': activeFilter !== '%s' }", id, id) }
@@ -147,8 +147,8 @@ templ navItem(id, icon, label, url, currentFilter string, count int) {
 
 templ labelItem(label, currentFilter string, count int) {
 	<a
-		hx-get={ fmt.Sprintf("/list_main?filter=label:%s", label) }
-		hx-target="#main-content"
+		hx-get={ fmt.Sprintf("/list?filter=label:%s", label) }
+		hx-target="#torrent-list"
 		hx-swap="innerHTML"
 		@click={ fmt.Sprintf("activeFilter = 'label:%s'; mobileMenuOpen = false;", label) }
 		:class={ fmt.Sprintf("{ 'bg-white/[0.03] text-primary border-white/5': activeFilter === 'label:%s', 'text-slate-400 hover:bg-white/5 border-transparent': activeFilter !== 'label:%s' }", label, label) }
