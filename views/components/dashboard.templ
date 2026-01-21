@@ -104,6 +104,7 @@ templ DashboardMainArea(props DashboardProps) {
 		<!-- Mobile Floating Action Button -->
 		<button
 			@click="$dispatch('open-add-modal')"
+			style="background-color: #0d9488;"
 			class="md:hidden fixed bottom-[calc(1.5rem+env(safe-area-inset-bottom))] right-6 size-14 bg-primary text-white rounded-full shadow-lg shadow-primary/40 flex items-center justify-center z-40 active:scale-95 transition-transform"
 		>
 			<span class="material-symbols-outlined text-3xl">add</span>
