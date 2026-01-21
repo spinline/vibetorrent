@@ -4,11 +4,11 @@ import "rtorrent-go/views/layout"
 
 templ SetupPage(errorMsg string) {
 	@layout.Base("Setup - VibeTorrent") {
-		<div class="min-h-screen bg-background-dark overflow-y-auto py-8 px-4">
-			<div class="w-full max-w-2xl mx-auto">
+		<div class="min-h-screen bg-background-dark overflow-y-auto py-8 px-4 flex items-center justify-center">
+			<div class="w-full max-w-2xl">
 				<!-- Logo & Welcome -->
 				<div class="text-center mb-6">
-					<div class="size-16 bg-primary rounded-2xl flex items-center justify-center text-white shadow-[0_0_30px_rgba(13,148,136,0.3)] mx-auto mb-4">
+					<div class="size-16 rounded-2xl flex items-center justify-center text-white mx-auto mb-4" style="background-color: #0d9488; box-shadow: 0 0 30px rgba(13,148,136,0.3);">
 						<span class="material-symbols-outlined text-4xl font-bold">box_edit</span>
 					</div>
 					<h1 class="text-3xl font-black text-white mb-2">Welcome to VibeTorrent</h1>
