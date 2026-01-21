@@ -287,6 +287,38 @@ func main() {
 		components.SettingsMainArea().Render(r.Context(), w)
 	})
 
+	// JSON endpoint for dynamic badge counts (used by Alpine.js polling)
+	r.Get("/api/counts", func(w http.ResponseWriter, r *http.Request) {
+		torrents, _ := client.GetTorrents(r.Context())
+		counts := map[string]int{
+			"all":         len(torrents),
+			"downloading": 0,
+			"seeding":     0,
+			"paused":      0,
+		}
+		labelCounts := make(map[string]int)
+
+		for _, t := range torrents {
+			switch t.State {
+			case "downloading":
+				counts["downloading"]++
+			case "seeding":
+				counts["seeding"]++
+			case "paused":
+				counts["paused"]++
+			}
+			if t.Label != "" {
+				labelCounts[t.Label]++
+			}
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"counts":      counts,
+			"labelCounts": labelCounts,
+		})
+	})
+
 	r.Get("/list", func(w http.ResponseWriter, r *http.Request) {
 		torrents, _ := client.GetTorrents(r.Context())
 		filter := r.URL.Query().Get("filter")

@@ -1,6 +1,7 @@
 package components
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -96,4 +97,20 @@ func GetStatusBadge(state string) string {
 	}
 
 	return fmt.Sprintf(`<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium %s border border-transparent"><span class="material-symbols-outlined text-[14px]">%s</span>%s</span>`, color, icon, strings.Title(state))
+}
+
+func countsToJSON(counts map[string]int) string {
+	if counts == nil {
+		counts = map[string]int{}
+	}
+	b, _ := json.Marshal(counts)
+	return string(b)
+}
+
+func labelCountsToJSON(labelCounts map[string]int) string {
+	if labelCounts == nil {
+		labelCounts = map[string]int{}
+	}
+	b, _ := json.Marshal(labelCounts)
+	return string(b)
 }
