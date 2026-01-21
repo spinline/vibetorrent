@@ -1,0 +1,93 @@
+name: Build and Release MIPS
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build MIPS Binaries
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+
+      - name: Install templ
+        run: go install github.com/a-h/templ/cmd/templ@latest
+
+      - name: Generate templ files
+        run: templ generate
+
+      - name: Build for MIPS (big-endian)
+        run: |
+          CGO_ENABLED=0 GOOS=linux GOARCH=mips go build \
+            -ldflags="-s -w" \
+            -o rtorrent-webui-mips \
+            cmd/server/main.go
+
+      - name: Build for MIPSLE (little-endian)
+        run: |
+          CGO_ENABLED=0 GOOS=linux GOARCH=mipsle go build \
+            -ldflags="-s -w" \
+            -o rtorrent-webui-mipsle \
+            cmd/server/main.go
+
+      - name: Get version
+        id: get_version
+        run: |
+          if [[ $GITHUB_REF == refs/tags/* ]]; then
+            echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+          else
+            echo "VERSION=dev-$(date +'%Y%m%d')-${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.get_version.outputs.VERSION }}
+          name: Release ${{ steps.get_version.outputs.VERSION }}
+          draft: false
+          prerelease: ${{ !startsWith(github.ref, 'refs/tags/v') }}
+          files: |
+            rtorrent-webui-mips
+            rtorrent-webui-mipsle
+          body: |
+            ## rTorrent Web UI - MIPS Release
+            
+            ### Download
+            - `rtorrent-webui-mips` - MIPS Big-endian
+            - `rtorrent-webui-mipsle` - MIPS Little-endian
+            
+            ### Installation
+            ```bash
+            # Download for your architecture
+            wget https://github.com/${{ github.repository }}/releases/download/${{ steps.get_version.outputs.VERSION }}/rtorrent-webui-mips
+            chmod +x rtorrent-webui-mips
+            ./rtorrent-webui-mips
+            ```
+            
+            Built from commit: ${{ github.sha }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: mips-binaries
+          path: |
+            rtorrent-webui-mips
+            rtorrent-webui-mipsle
+          retention-days: 30
