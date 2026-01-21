@@ -33,6 +33,8 @@ templ TorrentCard(t rtorrent.Torrent) {
 					</div>
 				</div>
 				<button
+					style="background-color: rgba(30,41,59,0.5); color: #64748b;"
+					style="background-color: rgba(30,41,59,0.5); color: #64748b;"
 					class="size-10 flex items-center justify-center bg-slate-800/50 rounded-full text-slate-500 hover:text-red-400 transition-colors"
 					@click.stop="if(confirm('Are you sure?')) { deleted = true; htmx.ajax('DELETE', '/torrent/' + hash, { swap: 'none' }) }"
 				>

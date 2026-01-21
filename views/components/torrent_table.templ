@@ -113,6 +113,7 @@ templ TorrentRow(t rtorrent.Torrent) {
 		<td class="px-4 py-4 text-right">
 			<button
 				class="p-1.5 hover:bg-slate-800 rounded-lg text-slate-500 hover:text-primary transition-all"
+				style="color: #64748b;"
 				@click.stop="if(confirm('Are you sure?')) { deleted = true; htmx.ajax('DELETE', '/torrent/' + hash, { swap: 'none' }) }"
 			>
 				<span class="material-symbols-outlined text-xl">delete</span>
