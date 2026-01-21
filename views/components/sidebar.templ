@@ -130,7 +130,7 @@ templ navItem(id, icon, label, url, currentFilter string, count int) {
 	<a
 		hx-get={ url }
 		hx-target="#torrent-list"
-		hx-swap="outerHTML"
+		hx-swap="innerHTML"
 		@click={ fmt.Sprintf("activeFilter = '%s'; mobileMenuOpen = false;", id) }
 		:class={ fmt.Sprintf("{ 'bg-white/[0.03] text-primary border-white/5': activeFilter === '%s', 'text-slate-400 hover:bg-white/5 border-transparent': activeFilter !== '%s' }", id, id) }
 		class={ "w-full flex items-center gap-3 px-4 py-3 rounded-xl border transition-colors duration-200 group cursor-pointer", templ.KV("bg-white/[0.03] text-primary border-white/5", currentFilter == id), templ.KV("text-slate-400 hover:bg-white/5 border-transparent", currentFilter != id) }
@@ -149,7 +149,7 @@ templ labelItem(label, currentFilter string, count int) {
 	<a
 		hx-get={ fmt.Sprintf("/list?filter=label:%s", label) }
 		hx-target="#torrent-list"
-		hx-swap="outerHTML"
+		hx-swap="innerHTML"
 		@click={ fmt.Sprintf("activeFilter = 'label:%s'; mobileMenuOpen = false;", label) }
 		:class={ fmt.Sprintf("{ 'bg-white/[0.03] text-primary border-white/5': activeFilter === 'label:%s', 'text-slate-400 hover:bg-white/5 border-transparent': activeFilter !== 'label:%s' }", label, label) }
 		class={ "w-full flex items-center gap-3 px-4 py-3 rounded-xl border transition-all duration-200 group cursor-pointer", templ.KV("bg-white/[0.03] text-primary border-white/5", currentFilter == "label:"+label), templ.KV("text-slate-400 hover:bg-white/5 border-transparent", currentFilter != "label:"+label) }
