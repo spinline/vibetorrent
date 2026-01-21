@@ -104,6 +104,7 @@ templ TransfersSidebar(props SidebarProps) {
 		<div class="px-6 py-4">
 			<button
 				@click="$dispatch('open-add-modal')"
+				style="background-color: #0d9488; color: white;"
 				class="w-full flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-white font-bold py-3 rounded-xl transition-colors shadow-lg shadow-primary/20 active:scale-[0.98]"
 			>
 				<span class="material-symbols-outlined text-xl">add</span>
@@ -134,6 +135,10 @@ templ navItem(id, icon, label, url, currentFilter string, count int) {
 		x-data={ fmt.Sprintf("{ isActive: %v }", currentFilter == id) }
 		@click={ fmt.Sprintf("activeFilter = '%s'; mobileMenuOpen = false; isActive = true", id) }
 		:class="{ 'bg-white/[0.03] text-primary border-white/5': isActive, 'text-slate-400 hover:bg-white/5 hover:text-white border-transparent': !isActive }"
+		style={ templ.SafeCSS(fmt.Sprintf("color: %s; background-color: %s; border-color: %s;",
+			func() string { if currentFilter == id { return "#0d9488" } else { return "#94a3b8" } }(),
+			func() string { if currentFilter == id { return "rgba(255, 255, 255, 0.03)" } else { return "transparent" } }(),
+			func() string { if currentFilter == id { return "rgba(255, 255, 255, 0.05)" } else { return "transparent" } }())) }
 		class={ "w-full flex items-center gap-3 px-4 py-3 rounded-xl border transition-colors duration-200 group cursor-pointer", templ.KV("bg-white/[0.03] text-primary border-white/5", currentFilter == id), templ.KV("text-slate-400 hover:bg-white/5 border-transparent", currentFilter != id) }
 	>
 		<span class="material-symbols-outlined text-[20px]">{ icon }</span>
@@ -154,6 +159,10 @@ templ labelItem(label, currentFilter string, count int) {
 		x-data={ fmt.Sprintf("{ isActive: %v }", currentFilter == "label:"+label) }
 		@click={ fmt.Sprintf("activeFilter = 'label:%s'; mobileMenuOpen = false; isActive = true", label) }
 		:class="{ 'bg-white/[0.03] text-primary border-white/5': isActive, 'text-slate-400 hover:bg-white/5 hover:text-white border-transparent': !isActive }"
+		style={ templ.SafeCSS(fmt.Sprintf("color: %s; background-color: %s; border-color: %s;",
+			func() string { if currentFilter == "label:"+label { return "#0d9488" } else { return "#94a3b8" } }(),
+			func() string { if currentFilter == "label:"+label { return "rgba(255, 255, 255, 0.03)" } else { return "transparent" } }(),
+			func() string { if currentFilter == "label:"+label { return "rgba(255, 255, 255, 0.05)" } else { return "transparent" } }())) }
 		class={ "w-full flex items-center gap-3 px-4 py-3 rounded-xl border transition-all duration-200 group cursor-pointer", templ.KV("bg-white/[0.03] text-primary border-white/5", currentFilter == "label:"+label), templ.KV("text-slate-400 hover:bg-white/5 border-transparent", currentFilter != "label:"+label) }
 	>
 		<span class="w-2.5 h-2.5 rounded-full bg-blue-500" style="background-color: #3b82f6;"></span>
