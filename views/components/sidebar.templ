@@ -108,14 +108,14 @@ templ TransfersSidebar(props SidebarProps) {
 			}`, countsToJSON(props.Counts), labelCountsToJSON(props.LabelCounts)) }
 		>
 			<div class="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] px-4 mb-3 mt-4">Transfers</div>
-			@navItemDynamic("all", "layers", "All Torrents", "/list_main?filter=all", props.Filter)
-			@navItemDynamic("downloading", "downloading", "Downloading", "/list_main?filter=downloading", props.Filter)
-			@navItemDynamic("seeding", "upload", "Seeding", "/list_main?filter=seeding", props.Filter)
-			@navItemDynamic("paused", "pause_circle", "Paused", "/list_main?filter=paused", props.Filter)
+			@navItemDynamic("all", "layers", "All Torrents", "/list_main?filter=all", props.Filter, props.Counts["all"])
+			@navItemDynamic("downloading", "downloading", "Downloading", "/list_main?filter=downloading", props.Filter, props.Counts["downloading"])
+			@navItemDynamic("seeding", "upload", "Seeding", "/list_main?filter=seeding", props.Filter, props.Counts["seeding"])
+			@navItemDynamic("paused", "pause_circle", "Paused", "/list_main?filter=paused", props.Filter, props.Counts["paused"])
 			if len(props.Labels) > 0 {
 				<div class="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] px-4 mb-3 mt-8">Labels</div>
 				for _, label := range props.Labels {
-					@labelItemDynamic(label, props.Filter)
+					@labelItemDynamic(label, props.Filter, props.LabelCounts[label])
 				}
 			}
 		</nav>
@@ -169,7 +169,7 @@ templ navItem(id, icon, label, url, currentFilter string, count int) {
 	</a>
 }
 
-templ navItemDynamic(id, icon, label, url, currentFilter string) {
+templ navItemDynamic(id, icon, label, url, currentFilter string, initialCount int) {
 	<a
 		hx-get={ url }
 		hx-target="#main-content"
@@ -186,10 +186,11 @@ templ navItemDynamic(id, icon, label, url, currentFilter string) {
 		<span class="material-symbols-outlined text-[20px]">{ icon }</span>
 		<span class="text-[13px] font-bold">{ label }</span>
 		<span
-			x-show={ fmt.Sprintf("counts['%s'] > 0", id) }
 			x-text={ fmt.Sprintf("counts['%s']", id) }
+			x-show={ fmt.Sprintf("counts['%s'] > 0", id) }
+			style={ templ.SafeCSS(fmt.Sprintf("display: %s;", func() string { if initialCount > 0 { return "inline" } else { return "none" } }())) }
 			class="ml-auto text-[10px] bg-primary/20 text-primary px-1.5 py-0.5 rounded font-bold"
-		></span>
+		>{ fmt.Sprint(initialCount) }</span>
 	</a>
 }
 
@@ -215,7 +216,7 @@ templ labelItem(label, currentFilter string, count int) {
 	</a>
 }
 
-templ labelItemDynamic(label, currentFilter string) {
+templ labelItemDynamic(label, currentFilter string, initialCount int) {
 	<a
 		hx-get={ fmt.Sprintf("/list_main?filter=label:%s", label) }
 		hx-target="#main-content"
@@ -232,8 +233,8 @@ templ labelItemDynamic(label, currentFilter string) {
 		<span class="w-2.5 h-2.5 rounded-full bg-blue-500" style="background-color: #3b82f6;"></span>
 		<span class="text-[13px] font-bold">{ label }</span>
 		<span
-			x-text={ fmt.Sprintf("labelCounts['%s'] || 0", label) }
+			x-text={ fmt.Sprintf("labelCounts['%s'] || %d", label, initialCount) }
 			class="ml-auto text-[10px] bg-slate-800 text-slate-500 px-1.5 py-0.5 rounded font-bold"
-		></span>
+		>{ fmt.Sprint(initialCount) }</span>
 	</a>
 }
