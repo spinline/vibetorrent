@@ -41,8 +41,9 @@ templ Base(title string) {
 					}
 				}
 			}
-		}
-	</script>
+		}	/* Critical CSS for FOUC prevention */
+	.bg-primary { background-color: #0d9488 !important; }
+	.text-white { color: white !important; }	</script>
 			// Fonts (Self-hosted fallback)
 			<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
 			<style>
