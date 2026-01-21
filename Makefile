@@ -1,5 +1,8 @@
 .PHONY: build clean templ run dev install
 
+# Go binary path
+GO := /usr/local/go/bin/go
+
 # Binary name
 BINARY=vibetorrent
 MIPS_BINARY=rtorrent-webui-mipsle
@@ -8,14 +11,14 @@ MIPS_BE_BINARY=rtorrent-webui-mips
 # Build for current platform
 build: templ
 	@echo "🏗️  Building for current platform..."
-	@go build -ldflags="-s -w" -o $(BINARY) ./cmd/server
+	@$(GO) build -ldflags="-s -w" -o $(BINARY) ./cmd/server
 	@chmod +x $(BINARY)
 	@echo "✅ Build complete: $(BINARY)"
 
 # Build for MIPS little-endian
 build-mips: templ
 	@echo "🏗️  Building for MIPS (little-endian)..."
-	@CGO_ENABLED=0 GOOS=linux GOARCH=mipsle go build \
+	@CGO_ENABLED=0 GOOS=linux GOARCH=mipsle $(GO) build \
 		-ldflags="-s -w" \
 		-o $(MIPS_BINARY) \
 		./cmd/server
@@ -25,7 +28,7 @@ build-mips: templ
 # Build for MIPS big-endian
 build-mips-be: templ
 	@echo "🏗️  Building for MIPS (big-endian)..."
-	@CGO_ENABLED=0 GOOS=linux GOARCH=mips go build \
+	@CGO_ENABLED=0 GOOS=linux GOARCH=mips $(GO) build \
 		-ldflags="-s -w" \
 		-o $(MIPS_BE_BINARY) \
 		./cmd/server
@@ -58,8 +61,8 @@ dev:
 # Install dependencies
 install:
 	@echo "📦 Installing dependencies..."
-	@go mod download
-	@go install github.com/a-h/templ/cmd/templ@latest
+	@$(GO) mod download
+	@$(GO) install github.com/a-h/templ/cmd/templ@latest
 	@echo "✅ Dependencies installed"
 
 # Clean build artifacts
