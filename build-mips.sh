@@ -23,6 +23,9 @@ CGO_ENABLED=0 GOOS=linux GOARCH=$ARCH go build \
   -o rtorrent-webui-$ARCH \
   cmd/server/main.go
 
+# Make executable
+chmod +x rtorrent-webui-$ARCH
+
 echo "✅ Build complete!"
 echo ""
 echo "📦 Binary info:"
