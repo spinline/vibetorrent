@@ -52,12 +52,12 @@ templ SidebarLayout(header templ.Component) {
 templ DefaultHeader() {
 	<div class="p-6 pb-2 flex items-center justify-between">
 		<div class="flex items-center gap-4">
-			<div class="size-12 bg-primary rounded-xl flex items-center justify-center text-white shadow-[0_0_20px_rgba(13,148,136,0.3)] shrink-0">
+			<div style="background-color: #0d9488;" class="size-12 bg-primary rounded-xl flex items-center justify-center text-white shadow-[0_0_20px_rgba(13,148,136,0.3)] shrink-0">
 				<span class="material-symbols-outlined text-2xl font-bold">box_edit</span>
 			</div>
 			<div class="overflow-hidden">
 				<h1 class="text-xl font-bold tracking-tight text-white truncate">rTorrent</h1>
-				<p class="text-[10px] text-primary font-bold uppercase tracking-wider">v0.9.8</p>
+				<p style="color: #0d9488;" class="text-[10px] text-primary font-bold uppercase tracking-wider">v0.9.8</p>
 			</div>
 		</div>
 		<button @click="mobileMenuOpen = false" class="md:hidden text-slate-500 hover:text-white p-2 shrink-0">
@@ -71,13 +71,14 @@ templ SettingsHeader() {
 		<div class="flex items-center gap-4">
 			<a
 				href="/"
+				style="background-color: #0d9488;"
 				class="size-12 bg-primary rounded-2xl flex items-center justify-center text-white shadow-lg shadow-primary/20 shrink-0 hover:scale-105 transition-transform active:scale-95"
 			>
 				<span class="material-symbols-outlined text-2xl">arrow_back</span>
 			</a>
 			<div class="overflow-hidden">
 				<h1 class="text-xl font-black tracking-tight text-white truncate leading-tight">Settings</h1>
-				<p class="text-[10px] text-primary font-bold uppercase tracking-wider">Configuration</p>
+				<p style="color: #0d9488;" class="text-[10px] text-primary font-bold uppercase tracking-wider">Configuration</p>
 			</div>
 			<button @click="mobileMenuOpen = false" class="ml-auto md:hidden text-slate-500 hover:text-white p-2 shrink-0">
 				<span class="material-symbols-outlined">close</span>
