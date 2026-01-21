@@ -11,7 +11,7 @@ type Stats struct {
 }
 
 templ StatsGrid(stats Stats) {
-	<div id="stats-grid" hx-swap-oob="true" class="bg-white/[0.03] border border-white/[0.05] rounded-2xl p-5 md:p-6 grid grid-cols-2 lg:grid-cols-4 gap-y-6 gap-x-4 mb-8 backdrop-blur-sm">
+	<div id="stats-grid" class="bg-white/[0.03] border border-white/[0.05] rounded-2xl p-5 md:p-6 grid grid-cols-2 lg:grid-cols-4 gap-y-6 gap-x-4 mb-8 backdrop-blur-sm">
 		@statCard("Download", formatSpeed(stats.DownloadSpeed), "arrow_downward", "text-primary")
 		@statCard("Upload", formatSpeed(stats.UploadSpeed), "arrow_upward", "text-emerald-500")
 		@statCard("Free Disk", formatDisk(stats.DiskFree, stats.DiskTotal), "database", "text-blue-400")
