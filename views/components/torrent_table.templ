@@ -6,7 +6,26 @@ import (
 )
 
 templ TorrentTable(torrents []rtorrent.Torrent, sortBy, order, filter string) {
-	<div class="bg-surface-dark rounded-xl border border-slate-800 shadow-sm overflow-hidden flex flex-col">
+	<div
+		class="bg-surface-dark rounded-xl border border-slate-800 shadow-sm overflow-hidden flex flex-col"
+		x-data={ fmt.Sprintf(`{
+			torrentCount: %d,
+			filter: '%s',
+			async refreshCount() {
+				try {
+					const res = await fetch('/api/counts');
+					const data = await res.json();
+					if (this.filter.startsWith('label:')) {
+						const label = this.filter.substring(6);
+						this.torrentCount = data.labelCounts[label] || 0;
+					} else {
+						this.torrentCount = data.counts[this.filter] || data.counts['all'];
+					}
+				} catch(e) {}
+			},
+			init() { setInterval(() => this.refreshCount(), 3000); }
+		}`, len(torrents), func() string { if filter == "" { return "all" } else { return filter } }()) }
+	>
 		<div id="torrent-table-scroll-container" class="overflow-x-auto scrollbar-thin scroll-touch">
 			<table id="torrent-table" class="w-full text-left border-collapse min-w-[800px] md:min-w-0 table-fixed">
 				<colgroup>
@@ -61,7 +80,7 @@ templ TorrentTable(torrents []rtorrent.Torrent, sortBy, order, filter string) {
 		<!-- Footer -->
 		<div class="px-6 py-4 bg-background-dark/30 border-t border-slate-800 flex justify-between items-center shrink-0">
 			<p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">
-				Showing <span id="torrent-count" hx-swap-oob="true">{ fmt.Sprint(len(torrents)) }</span> torrents
+				Showing <span x-text="torrentCount">{ fmt.Sprint(len(torrents)) }</span> torrents
 			</p>
 		</div>
 	</div>
