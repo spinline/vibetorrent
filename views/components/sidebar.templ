@@ -143,7 +143,7 @@ templ navItem(id, icon, label, url, currentFilter string, count int) {
 	>
 		<span class="material-symbols-outlined text-[20px]">{ icon }</span>
 		<span class="text-[13px] font-bold">{ label }</span>
-		if count > 0 {
+		if count > 0 && currentFilter == id {
 			<span class="ml-auto text-[10px] bg-primary/20 text-primary px-1.5 py-0.5 rounded font-bold">
 				{ fmt.Sprint(count) }
 			</span>
