@@ -61,11 +61,11 @@ templ TorrentTable(torrents []rtorrent.Torrent, sortBy, order, filter string) {
 				>
 					if len(torrents) == 0 {
 						<tr>
-							<td colspan="8" class="px-6 py-12 text-center text-slate-500">
-								<div class="flex flex-col items-center gap-3">
-									<span class="material-symbols-outlined text-4xl text-slate-400">cloud_download</span>
-									<p class="font-medium">No torrents yet</p>
-									<p class="text-sm">Add a torrent to get started</p>
+							<td colspan="8" class="px-6 py-6 text-center text-slate-500">
+								<div class="flex flex-col items-center gap-2">
+									<span class="material-symbols-outlined text-3xl text-slate-400">cloud_download</span>
+									<p class="font-medium text-sm">No torrents yet</p>
+									<p class="text-xs">Add a torrent to get started</p>
 								</div>
 							</td>
 						</tr>

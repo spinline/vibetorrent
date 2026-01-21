@@ -364,7 +364,7 @@ func main() {
 					shouldInclude = t.Label == filter[6:]
 				}
 			}
-			
+
 			// Apply search filter
 			if shouldInclude && search != "" {
 				nameLower := strings.ToLower(t.Name)
@@ -372,7 +372,7 @@ func main() {
 					shouldInclude = false
 				}
 			}
-			
+
 			if shouldInclude {
 				filtered = append(filtered, t)
 			}
