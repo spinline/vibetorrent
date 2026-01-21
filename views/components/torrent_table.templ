@@ -8,7 +8,17 @@ import (
 templ TorrentTable(torrents []rtorrent.Torrent, sortBy, order, filter string) {
 	<div class="bg-surface-dark rounded-xl border border-slate-800 shadow-sm overflow-hidden flex flex-col">
 		<div id="torrent-table-scroll-container" class="overflow-x-auto scrollbar-thin scroll-touch">
-			<table id="torrent-table" class="w-full text-left border-collapse min-w-[800px] md:min-w-0">
+			<table id="torrent-table" class="w-full text-left border-collapse min-w-[800px] md:min-w-0 table-fixed">
+				<colgroup>
+					<col style="width: 35%;" />
+					<col style="width: 10%;" />
+					<col style="width: 15%;" />
+					<col style="width: 10%;" />
+					<col style="width: 10%;" />
+					<col style="width: 10%;" />
+					<col style="width: 8%;" />
+					<col style="width: 2%;" />
+				</colgroup>
 				<thead class="bg-background-dark border-b border-slate-800 sticky top-0 z-10">
 					<tr>
 						@tableHeader("Name", "name", sortBy, order, filter, false)
@@ -18,7 +28,7 @@ templ TorrentTable(torrents []rtorrent.Torrent, sortBy, order, filter string) {
 						@tableHeader("DL Speed", "down_speed", sortBy, order, filter, true)
 						@tableHeader("UL Speed", "up_speed", sortBy, order, filter, true)
 						@tableHeader("ETA", "eta", sortBy, order, filter, true)
-						<th class="px-6 py-4 w-10"></th>
+						<th class="px-6 py-4"></th>
 					</tr>
 				</thead>
 				<tbody
@@ -71,11 +81,11 @@ templ TorrentRow(t rtorrent.Torrent) {
 		@touchend="clearTimeout(pressTimer); if(longPressTriggered) $event.preventDefault()"
 		@touchmove="clearTimeout(pressTimer)"
 	>
-		<td class="px-6 py-4 min-w-[200px] max-w-xs sm:max-w-md">
-			<div class="flex items-center gap-3">
+		<td class="px-6 py-4">
+			<div class="flex items-center gap-3 overflow-hidden">
 				<span class="material-symbols-outlined text-slate-400 shrink-0">description</span>
 				<div class="min-w-0 flex-1">
-					<div class="text-xs sm:text-sm font-bold truncate whitespace-nowrap text-white" title={ t.Name }>{ t.Name }</div>
+					<div class="text-xs sm:text-sm font-bold truncate text-white" title={ t.Name }>{ t.Name }</div>
 				</div>
 			</div>
 		</td>
