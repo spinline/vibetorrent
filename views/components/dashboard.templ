@@ -53,9 +53,8 @@ templ DashboardMainArea(props DashboardProps) {
 					>
 						<span class="material-symbols-outlined">menu</span>
 					</button>
-					<!-- Mobile: Title | Desktop: Search -->
-					<h1 class="md:hidden text-xl font-bold text-white">Transferler</h1>
-					<div class="relative flex-1 max-w-64 hidden md:block" x-data="{ query: '', timeout: null }">
+					<!-- Search Input - Both Mobile and Desktop -->
+					<div class="relative flex-1 max-w-xs md:max-w-64" x-data="{ query: '', timeout: null }">
 						<span
 							class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm"
 						>search</span>
@@ -98,11 +97,9 @@ templ DashboardMainArea(props DashboardProps) {
 			id="scroll-container"
 		>
 			<div class="p-3 md:p-8">
-				<!-- Stats Grid - Visible on Desktop Only -->
-				<div class="hidden md:block">
-					@StatsGrid(props.Stats)
-				</div>
-				<div class="md:mt-8">
+				<!-- Stats Grid - Both Mobile and Desktop -->
+				@StatsGrid(props.Stats)
+				<div class="mt-6 md:mt-8">
 					<div id="torrent-list">
 						@TorrentTable(props.Torrents, props.SortBy, props.Order, props.Sidebar.Filter)
 					</div>
