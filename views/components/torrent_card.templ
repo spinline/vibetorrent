@@ -9,7 +9,6 @@ templ TorrentCard(t rtorrent.Torrent) {
 	<div
 		class="torrent-card bg-slate-800/30 backdrop-blur-sm rounded-2xl p-4 mb-3 border border-slate-700/50 hover:border-slate-600/50 transition-all duration-200 active:scale-[0.98]"
 		x-data={ fmt.Sprintf("{ deleted: false, pressTimer: null, longPressTriggered: false, hash: '%s', name: '%s', priority: %d }", t.Hash, t.Name, t.Priority) }
-		x-cloak
 		x-show="!deleted"
 		x-transition:leave="transition ease-in duration-300"
 		hx-get={ fmt.Sprintf("/torrent/%s/details", t.Hash) }
