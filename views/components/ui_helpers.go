@@ -99,6 +99,68 @@ func GetStatusBadge(state string) string {
 	return fmt.Sprintf(`<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium %s border border-transparent"><span class="material-symbols-outlined text-[14px]">%s</span>%s</span>`, color, icon, strings.Title(state))
 }
 
+func GetStatusText(state string) string {
+	switch state {
+	case "downloading":
+		return `<span class="text-primary font-medium">İndiriliyor</span>`
+	case "seeding":
+		return `<span class="text-emerald-400 font-medium">Seeding</span>`
+	case "paused":
+		return `<span class="text-orange-400 font-medium">Duraklatıldı</span>`
+	case "stopped":
+		return `<span class="text-slate-500 font-medium">Durduruldu</span>`
+	case "checking":
+		return `<span class="text-blue-400 font-medium">Kontrol ediliyor</span>`
+	default:
+		return `<span class="text-slate-500 font-medium">` + strings.Title(state) + `</span>`
+	}
+}
+
+func getStatusIcon(state string) string {
+	switch state {
+	case "downloading":
+		return "download"
+	case "seeding":
+		return "check_circle"
+	case "paused", "stopped":
+		return "pause_circle"
+	case "checking":
+		return "sync"
+	default:
+		return "help"
+	}
+}
+
+func getStatusIconBg(state string) string {
+	switch state {
+	case "downloading":
+		return "bg-primary/20"
+	case "seeding":
+		return "bg-emerald-500/20"
+	case "paused", "stopped":
+		return "bg-orange-500/20"
+	case "checking":
+		return "bg-blue-500/20"
+	default:
+		return "bg-slate-700/50"
+	}
+}
+
+func getStatusIconColor(state string) string {
+	switch state {
+	case "downloading":
+		return "text-primary"
+	case "seeding":
+		return "text-emerald-500"
+	case "paused", "stopped":
+		return "text-orange-500"
+	case "checking":
+		return "text-blue-500"
+	default:
+		return "text-slate-400"
+	}
+}
+
 func countsToJSON(counts map[string]int) string {
 	if counts == nil {
 		counts = map[string]int{}

@@ -53,7 +53,9 @@ templ DashboardMainArea(props DashboardProps) {
 					>
 						<span class="material-symbols-outlined">menu</span>
 					</button>
-					<div class="relative flex-1 max-w-64" x-data="{ query: '', timeout: null }">
+					<!-- Mobile: Title | Desktop: Search -->
+					<h1 class="md:hidden text-xl font-bold text-white">Transferler</h1>
+					<div class="relative flex-1 max-w-64 hidden md:block" x-data="{ query: '', timeout: null }">
 						<span
 							class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm"
 						>search</span>
@@ -77,10 +79,14 @@ templ DashboardMainArea(props DashboardProps) {
 						</button>
 					</div>
 				</div>
-				<div class="flex items-center gap-4 shrink-0">
+				<div class="flex items-center gap-3 shrink-0">
+					<!-- Sort Button for Mobile Only -->
+					<div class="md:hidden">
+						@SortDropdown(props.SortBy, props.Order, props.Sidebar.Filter)
+					</div>
 					<a
 						href="/settings"
-						class="size-10 rounded-full bg-surface-dark border border-slate-800 flex items-center justify-center text-slate-400 hover:text-primary transition-colors"
+						class="hidden md:flex size-10 rounded-full bg-surface-dark border border-slate-800 items-center justify-center text-slate-400 hover:text-primary transition-colors"
 					>
 						<span class="material-symbols-outlined">settings</span>
 					</a>
@@ -91,19 +97,12 @@ templ DashboardMainArea(props DashboardProps) {
 			class="flex-1 overflow-y-auto no-scrollbar relative scroll-touch"
 			id="scroll-container"
 		>
-			<div class="p-4 md:p-8">
-				@StatsGrid(props.Stats)
-				<div class="mt-8">
-					<div class="flex border-b border-slate-800 mb-6 gap-8">
-						<button class="pb-3 border-b-2 border-primary text-primary text-sm font-bold">
-							Default View
-						</button>
-						<button
-							class="pb-3 border-b-2 border-transparent text-slate-500 hover:text-slate-300 text-sm font-bold"
-						>
-							Detailed Analytics
-						</button>
-					</div>
+			<div class="p-3 md:p-8">
+				<!-- Stats Grid - Visible on Desktop Only -->
+				<div class="hidden md:block">
+					@StatsGrid(props.Stats)
+				</div>
+				<div class="md:mt-8">
 					<div id="torrent-list">
 						@TorrentTable(props.Torrents, props.SortBy, props.Order, props.Sidebar.Filter)
 					</div>
@@ -119,4 +118,76 @@ templ DashboardMainArea(props DashboardProps) {
 			<span class="material-symbols-outlined text-3xl">add</span>
 		</button>
 	</main>
+}
+
+templ SortDropdown(currentSort, currentOrder, filter string) {
+	<div class="relative" x-data="{ open: false }">
+		<button
+			@click="open = !open"
+			class="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-800/50 hover:bg-slate-700/50 text-slate-400 hover:text-white transition-colors text-sm"
+		>
+			<span class="material-symbols-outlined text-lg">sort</span>
+			<span class="hidden sm:inline">Sırala</span>
+		</button>
+		
+		<!-- Dropdown Menu -->
+		<div
+			x-show="open"
+			@click.away="open = false"
+			x-transition:enter="transition ease-out duration-100"
+			x-transition:enter-start="transform opacity-0 scale-95"
+			x-transition:enter-end="transform opacity-100 scale-100"
+			x-transition:leave="transition ease-in duration-75"
+			x-transition:leave-start="transform opacity-100 scale-100"
+			x-transition:leave-end="transform opacity-0 scale-95"
+			class="absolute right-0 mt-2 w-48 bg-slate-800 rounded-xl shadow-xl border border-slate-700 overflow-hidden z-50"
+			x-cloak
+		>
+			<div class="p-2 space-y-1">
+				@sortMenuItem("Ad", "name", currentSort, currentOrder, filter)
+				@sortMenuItem("Boyut", "size", currentSort, currentOrder, filter)
+				@sortMenuItem("İlerleme", "progress", currentSort, currentOrder, filter)
+				@sortMenuItem("Durum", "state", currentSort, currentOrder, filter)
+				@sortMenuItem("İndirme Hızı", "down_speed", currentSort, currentOrder, filter)
+				@sortMenuItem("Yükleme Hızı", "up_speed", currentSort, currentOrder, filter)
+				@sortMenuItem("Ekleme Tarihi", "date_added", currentSort, currentOrder, filter)
+			</div>
+		</div>
+	</div>
+}
+
+templ sortMenuItem(label, sortId, currentSort, currentOrder, filter string) {
+	<button
+		class={ "w-full px-3 py-2 text-left text-sm rounded-lg flex items-center justify-between transition-colors " + getSortItemClass(currentSort == sortId) }
+		hx-get={ fmt.Sprintf("/list?filter=%s&sort=%s&order=%s", filter, sortId, getNextSortOrder(currentSort, currentOrder, sortId)) }
+		hx-target="#torrent-list"
+		hx-swap="innerHTML"
+		@click="open = false"
+	>
+		<span>{ label }</span>
+		if currentSort == sortId {
+			if currentOrder == "asc" {
+				<span class="material-symbols-outlined text-sm text-primary">arrow_upward</span>
+			} else {
+				<span class="material-symbols-outlined text-sm text-primary">arrow_downward</span>
+			}
+		}
+	</button>
+}
+
+func getSortItemClass(active bool) string {
+	if active {
+		return "bg-primary/10 text-primary"
+	}
+	return "text-slate-400 hover:bg-slate-700/50 hover:text-white"
+}
+
+func getNextSortOrder(currentSort, currentOrder, id string) string {
+	if currentSort != id {
+		return "asc"
+	}
+	if currentOrder == "asc" {
+		return "desc"
+	}
+	return "asc"
 }

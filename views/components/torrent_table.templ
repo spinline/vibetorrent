@@ -7,7 +7,7 @@ import (
 
 templ TorrentTable(torrents []rtorrent.Torrent, sortBy, order, filter string) {
 	<div
-		class="bg-surface-dark rounded-xl border border-slate-800 shadow-sm overflow-hidden flex flex-col"
+		class="torrent-list-container"
 		x-data={ fmt.Sprintf(`{
 			torrentCount: %d,
 			filter: '%s',
@@ -26,61 +26,89 @@ templ TorrentTable(torrents []rtorrent.Torrent, sortBy, order, filter string) {
 			init() { setInterval(() => this.refreshCount(), 3000); }
 		}`, len(torrents), func() string { if filter == "" { return "all" } else { return filter } }()) }
 	>
-		<div id="torrent-table-scroll-container" class="overflow-x-auto scrollbar-thin scroll-touch">
-			<table id="torrent-table" class="w-full text-left border-collapse min-w-[800px] md:min-w-0 table-fixed">
-				<colgroup>
-					<col style="width: 35%;" />
-					<col style="width: 10%;" />
-					<col style="width: 15%;" />
-					<col style="width: 10%;" />
-					<col style="width: 10%;" />
-					<col style="width: 10%;" />
-					<col style="width: 8%;" />
-					<col style="width: 2%;" />
-				</colgroup>
-				<thead class="bg-background-dark border-b border-slate-800 sticky top-0 z-10">
-					<tr>
-						@tableHeader("Name", "name", sortBy, order, filter, false)
-						@tableHeader("Size", "size", sortBy, order, filter, false)
-						@tableHeader("Progress", "progress", sortBy, order, filter, false)
-						@tableHeader("Status", "state", sortBy, order, filter, false)
-						@tableHeader("DL Speed", "down_speed", sortBy, order, filter, true)
-						@tableHeader("UL Speed", "up_speed", sortBy, order, filter, true)
-						@tableHeader("ETA", "eta", sortBy, order, filter, true)
-						<th class="px-6 py-4"></th>
-					</tr>
-				</thead>
-				<tbody
-					id="torrent-table-body"
-					class="divide-y divide-slate-800"
-					hx-get={ fmt.Sprintf("/list?filter=%s&sort=%s&order=%s", filter, sortBy, order) }
-					hx-trigger="every 5s, refresh-list from:body"
-					hx-target="this"
-					hx-select="#torrent-table-body > *"
-					hx-swap="innerHTML settle:0"
-				>
-					if len(torrents) == 0 {
-						<tr>
-							<td colspan="8" class="px-6 py-6 text-center text-slate-500">
-								<div class="flex flex-col items-center gap-2">
-									<span class="material-symbols-outlined text-3xl text-slate-400">cloud_download</span>
-									<p class="font-medium text-sm">No torrents yet</p>
-									<p class="text-xs">Add a torrent to get started</p>
-								</div>
-							</td>
-						</tr>
-					} else {
-						for _, t := range torrents {
-							@TorrentRow(t)
-						}
-					}
-				</tbody>
-			</table>
+		<!-- Mobile: Card View -->
+		<div 
+			id="torrent-card-list" 
+			class="md:hidden"
+			hx-get={ fmt.Sprintf("/list?filter=%s&sort=%s&order=%s", filter, sortBy, order) }
+			hx-trigger="every 5s, refresh-list from:body"
+			hx-target="#torrent-card-list"
+			hx-select="#torrent-card-list > *"
+			hx-swap="innerHTML settle:0"
+		>
+			if len(torrents) == 0 {
+				<div class="flex flex-col items-center justify-center py-16 text-center">
+					<span class="material-symbols-outlined text-6xl text-slate-600 mb-4">cloud_download</span>
+					<p class="text-slate-400 font-medium mb-1">Henüz torrent yok</p>
+					<p class="text-slate-500 text-sm">Başlamak için bir torrent ekleyin</p>
+				</div>
+			} else {
+				for _, t := range torrents {
+					@TorrentCard(t)
+				}
+			}
 		</div>
+		
+		<!-- Desktop: Table View -->
+		<div class="hidden md:block bg-surface-dark rounded-xl border border-slate-800 shadow-sm overflow-hidden">
+			<div id="torrent-table-scroll-container" class="overflow-x-auto scrollbar-thin scroll-touch">
+				<table id="torrent-table" class="w-full text-left border-collapse table-fixed">
+					<colgroup>
+						<col style="width: 35%;" />
+						<col style="width: 10%;" />
+						<col style="width: 15%;" />
+						<col style="width: 10%;" />
+						<col style="width: 10%;" />
+						<col style="width: 10%;" />
+						<col style="width: 8%;" />
+						<col style="width: 2%;" />
+					</colgroup>
+					<thead class="bg-background-dark border-b border-slate-800 sticky top-0 z-10">
+						<tr>
+							@tableHeader("Name", "name", sortBy, order, filter, false)
+							@tableHeader("Size", "size", sortBy, order, filter, false)
+							@tableHeader("Progress", "progress", sortBy, order, filter, false)
+							@tableHeader("Status", "state", sortBy, order, filter, false)
+							@tableHeader("DL Speed", "down_speed", sortBy, order, filter, true)
+							@tableHeader("UL Speed", "up_speed", sortBy, order, filter, true)
+							@tableHeader("ETA", "eta", sortBy, order, filter, true)
+							<th class="px-6 py-4"></th>
+						</tr>
+					</thead>
+					<tbody
+						id="torrent-table-body"
+						class="divide-y divide-slate-800"
+						hx-get={ fmt.Sprintf("/list?filter=%s&sort=%s&order=%s", filter, sortBy, order) }
+						hx-trigger="every 5s, refresh-list from:body"
+						hx-target="this"
+						hx-select="#torrent-table-body > *"
+						hx-swap="innerHTML settle:0"
+					>
+						if len(torrents) == 0 {
+							<tr>
+								<td colspan="8" class="px-6 py-6 text-center text-slate-500">
+									<div class="flex flex-col items-center gap-2">
+										<span class="material-symbols-outlined text-3xl text-slate-400">cloud_download</span>
+										<p class="font-medium text-sm">No torrents yet</p>
+										<p class="text-xs">Add a torrent to get started</p>
+									</div>
+								</td>
+							</tr>
+						} else {
+							for _, t := range torrents {
+								@TorrentRow(t)
+							}
+						}
+					</tbody>
+				</table>
+			</div>
+		</div>
+		
 		<!-- Footer -->
-		<div class="px-6 py-4 bg-background-dark/30 border-t border-slate-800 flex justify-between items-center shrink-0">
-			<p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">
-				Showing <span x-text="torrentCount">{ fmt.Sprint(len(torrents)) }</span> torrents
+		<div class="px-5 py-3 md:px-6 md:py-4 bg-slate-900/50 md:bg-background-dark/30 border-t border-slate-800/50 md:border-slate-800 flex justify-between items-center">
+			<p class="text-xs md:text-[10px] text-slate-500 font-medium md:font-bold md:uppercase md:tracking-widest">
+				<span class="md:hidden"><span x-text="torrentCount">{ fmt.Sprint(len(torrents)) }</span> torrent gösteriliyor</span>
+				<span class="hidden md:inline">Showing <span x-text="torrentCount">{ fmt.Sprint(len(torrents)) }</span> torrents</span>
 			</p>
 		</div>
 	</div>
@@ -104,7 +132,7 @@ templ TorrentRow(t rtorrent.Torrent) {
 			<div class="flex items-center gap-3 overflow-hidden">
 				<span class="material-symbols-outlined text-slate-400 shrink-0">description</span>
 				<div class="min-w-0 flex-1">
-					<div class="text-xs sm:text-sm font-bold truncate text-white" title={ t.Name }>{ t.Name }</div>
+					<div class="text-sm font-bold truncate text-white" title={ t.Name }>{ t.Name }</div>
 				</div>
 			</div>
 		</td>
@@ -114,7 +142,7 @@ templ TorrentRow(t rtorrent.Torrent) {
 				<div class="flex-1 h-2 bg-slate-800 rounded-full overflow-hidden min-w-[60px]">
 					<div class={ "h-full " + GetProgressColor(t.State) } style={ fmt.Sprintf("width: %.1f%%", t.Progress) }></div>
 				</div>
-				<span class="text-xs font-bold w-10 sm:w-14 text-right text-slate-300">{ fmt.Sprintf("%.0f%%", t.Progress) }</span>
+				<span class="text-xs font-bold w-14 text-right text-slate-300">{ fmt.Sprintf("%.0f%%", t.Progress) }</span>
 			</div>
 		</td>
 		<td class="px-6 py-4">
@@ -132,7 +160,6 @@ templ TorrentRow(t rtorrent.Torrent) {
 		<td class="px-4 py-4 text-right">
 			<button
 				class="p-1.5 hover:bg-slate-800 rounded-lg text-slate-500 hover:text-primary transition-all"
-				style="color: #64748b;"
 				@click.stop="if(confirm('Are you sure?')) { deleted = true; htmx.ajax('DELETE', '/torrent/' + hash, { swap: 'none' }) }"
 			>
 				<span class="material-symbols-outlined text-xl">delete</span>
