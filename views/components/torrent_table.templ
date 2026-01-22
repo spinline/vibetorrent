@@ -52,16 +52,15 @@ templ TorrentTable(torrents []rtorrent.Torrent, sortBy, order, filter string) {
 		<!-- Desktop: Table View -->
 		<div class="hidden md:block bg-surface-dark rounded-xl border border-slate-800 shadow-sm overflow-hidden">
 			<div id="torrent-table-scroll-container" class="overflow-x-auto scrollbar-thin scroll-touch">
-				<table id="torrent-table" class="w-full text-left border-collapse table-fixed">
+				<table id="torrent-table" class="w-full text-left border-collapse table-fixed min-w-[800px]">
 					<colgroup>
-						<col style="width: 35%;" />
-						<col style="width: 10%;" />
-						<col style="width: 15%;" />
-						<col style="width: 10%;" />
-						<col style="width: 10%;" />
-						<col style="width: 10%;" />
-						<col style="width: 8%;" />
-						<col style="width: 2%;" />
+						<col class="w-[43%]" />
+						<col class="w-[9%]" />
+						<col class="w-[14%]" />
+						<col class="w-[10%]" />
+						<col class="w-[9%]" />
+						<col class="w-[9%]" />
+						<col class="w-[6%]" />
 					</colgroup>
 					<thead class="bg-background-dark border-b border-slate-800 sticky top-0 z-10">
 						<tr>
@@ -69,10 +68,9 @@ templ TorrentTable(torrents []rtorrent.Torrent, sortBy, order, filter string) {
 							@tableHeader("Size", "size", sortBy, order, filter, false)
 							@tableHeader("Progress", "progress", sortBy, order, filter, false)
 							@tableHeader("Status", "state", sortBy, order, filter, false)
-							@tableHeader("DL Speed", "down_speed", sortBy, order, filter, true)
-							@tableHeader("UL Speed", "up_speed", sortBy, order, filter, true)
+							@tableHeader("↓ Speed", "down_speed", sortBy, order, filter, true)
+							@tableHeader("↑ Speed", "up_speed", sortBy, order, filter, true)
 							@tableHeader("ETA", "eta", sortBy, order, filter, true)
-							<th class="px-6 py-4"></th>
 						</tr>
 					</thead>
 					<tbody
@@ -128,42 +126,34 @@ templ TorrentRow(t rtorrent.Torrent) {
 		@touchend="clearTimeout(pressTimer); if(longPressTriggered) $event.preventDefault()"
 		@touchmove="clearTimeout(pressTimer)"
 	>
-		<td class="px-6 py-4">
-			<div class="flex items-center gap-3 overflow-hidden">
-				<span class="material-symbols-outlined text-slate-400 shrink-0">description</span>
+		<td class="px-4 py-3">
+			<div class="flex items-center gap-2 overflow-hidden">
+				<span class="material-symbols-outlined text-slate-400 shrink-0 text-lg">description</span>
 				<div class="min-w-0 flex-1">
-					<div class="text-sm font-bold truncate text-white" title={ t.Name }>{ t.Name }</div>
+					<div class="text-sm font-medium truncate text-white" title={ t.Name }>{ t.Name }</div>
 				</div>
 			</div>
 		</td>
-		<td class="px-6 py-4 text-sm font-medium whitespace-nowrap">{ FormatBytes(t.Size) }</td>
-		<td class="px-6 py-4">
-			<div class="flex items-center gap-3">
-				<div class="flex-1 h-2 bg-slate-800 rounded-full overflow-hidden min-w-[60px]">
+		<td class="px-3 py-3 text-xs font-medium text-slate-300 whitespace-nowrap">{ FormatBytes(t.Size) }</td>
+		<td class="px-3 py-3">
+			<div class="flex items-center gap-2">
+				<div class="flex-1 h-1.5 bg-slate-800 rounded-full overflow-hidden min-w-[50px]">
 					<div class={ "h-full " + GetProgressColor(t.State) } style={ fmt.Sprintf("width: %.1f%%", t.Progress) }></div>
 				</div>
-				<span class="text-xs font-bold w-14 text-right text-slate-300">{ fmt.Sprintf("%.0f%%", t.Progress) }</span>
+				<span class="text-xs font-medium w-10 text-right text-slate-400">{ fmt.Sprintf("%.0f%%", t.Progress) }</span>
 			</div>
 		</td>
-		<td class="px-6 py-4">
+		<td class="px-3 py-3">
 			@templ.Raw(GetStatusBadge(t.State))
 		</td>
-		<td class={ "px-6 py-4 text-sm text-right whitespace-nowrap " + getSpeedClass(t.DownloadRate > 0, true) }>
+		<td class={ "px-3 py-3 text-xs text-right whitespace-nowrap " + getSpeedClass(t.DownloadRate > 0, true) }>
 			{ FormatSpeed(t.DownloadRate) }
 		</td>
-		<td class={ "px-6 py-4 text-sm text-right whitespace-nowrap " + getSpeedClass(t.UploadRate > 0, false) }>
+		<td class={ "px-3 py-3 text-xs text-right whitespace-nowrap " + getSpeedClass(t.UploadRate > 0, false) }>
 			{ FormatSpeed(t.UploadRate) }
 		</td>
-		<td class="px-6 py-4 text-sm font-medium text-right text-slate-500 whitespace-nowrap">
+		<td class="px-3 py-3 text-xs font-medium text-right text-slate-500 whitespace-nowrap">
 			{ FormatETA(t.Size, t.Completed, t.DownloadRate) }
-		</td>
-		<td class="px-4 py-4 text-right">
-			<button
-				class="p-1.5 hover:bg-slate-800 rounded-lg text-slate-500 hover:text-primary transition-all"
-				@click.stop="if(confirm('Are you sure?')) { deleted = true; htmx.ajax('DELETE', '/torrent/' + hash, { swap: 'none' }) }"
-			>
-				<span class="material-symbols-outlined text-xl">delete</span>
-			</button>
 		</td>
 	</tr>
 }
@@ -180,7 +170,7 @@ func getSpeedClass(isActive bool, isDownload bool) string {
 
 templ tableHeader(label, id, currentSort, currentOrder, filter string, rightAlign bool) {
 	<th
-		class={ "px-6 py-4 text-[10px] font-bold uppercase tracking-widest whitespace-nowrap cursor-pointer hover:text-primary transition-colors select-none group ", getHeaderClass(currentSort == id, rightAlign) }
+		class={ "px-3 py-3 text-[10px] font-bold uppercase tracking-wider whitespace-nowrap cursor-pointer hover:text-primary transition-colors select-none group ", getHeaderClass(currentSort == id, rightAlign) }
 		hx-get={ fmt.Sprintf("/list_main?filter=%s&sort=%s&order=%s", filter, id, getNextOrder(currentSort, currentOrder, id)) }
 		hx-target="#torrent-table"
 		hx-select="#torrent-table"
