@@ -180,9 +180,9 @@ templ tableHeader(label, id, currentSort, currentOrder, filter string, rightAlig
 			{ label }
 			if currentSort == id {
 				if currentOrder == "asc" {
-					<span class="material-symbols-outlined text-xs">arrow_downward</span>
-				} else {
 					<span class="material-symbols-outlined text-xs">arrow_upward</span>
+				} else {
+					<span class="material-symbols-outlined text-xs">arrow_downward</span>
 				}
 			} else {
 				<span class="material-symbols-outlined text-xs text-slate-300 dark:text-slate-700 opacity-0 group-hover:opacity-100 transition-opacity">unfold_more</span>

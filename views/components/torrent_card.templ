@@ -14,7 +14,7 @@ templ TorrentCard(t rtorrent.Torrent) {
 		hx-get={ fmt.Sprintf("/torrent/%s/details", t.Hash) }
 		hx-target="#drawer-content"
 		hx-trigger="click"
-		@htmx:after-request="if(!longPressTriggered) $dispatch('open-drawer')"
+		hx-on::after-request="if(!this._x_dataStack[0].longPressTriggered) $dispatch('open-drawer')"
 		@contextmenu.prevent="$dispatch('open-context-menu', {x: $event.clientX, y: $event.clientY, hash: hash, name: name, priority: priority})"
 		@touchstart="longPressTriggered = false; pressTimer = setTimeout(() => { longPressTriggered = true; if (window.navigator.vibrate) window.navigator.vibrate(40); $dispatch('open-context-menu', {x: $event.touches[0].clientX, y: $event.touches[0].clientY, hash: hash, name: name, priority: priority}); }, 500)"
 		@touchend="clearTimeout(pressTimer); if(longPressTriggered) $event.preventDefault()"
@@ -54,10 +54,10 @@ templ TorrentCard(t rtorrent.Torrent) {
 			<!-- Menu Button -->
 			<button
 				class="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full hover:bg-slate-700/50 transition-colors text-slate-400 hover:text-slate-300"
-				style="width: 2.5rem; height: 2.5rem; display: flex; align-items: center; justify-content: center; border-radius: 9999px; flex-shrink: 0; color: #94a3b8;"
+				style="width: 2.5rem; height: 2.5rem; display: flex; align-items: center; justify-content: center; border-radius: 9999px; flex-shrink: 0; background-color: transparent;"
 				@click.stop="$dispatch('open-context-menu', {x: $event.clientX, y: $event.clientY, hash: hash, name: name, priority: priority})"
 			>
-				<span class="material-symbols-outlined" style="font-size: 24px; color: inherit;">more_vert</span>
+				<span class="material-symbols-outlined" style="font-family: 'Material Symbols Outlined'; font-size: 24px; color: #94a3b8;">more_vert</span>
 			</button>
 		</div>
 		
