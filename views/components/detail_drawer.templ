@@ -24,6 +24,7 @@ templ DetailDrawer() {
 			id="detail-drawer"
 			:class="open ? 'translate-x-0' : 'translate-x-full'"
 			class="fixed top-0 right-0 bottom-0 w-full md:w-[648px] bg-surface-dark border-l border-slate-800 flex flex-col shadow-2xl transition-transform duration-300 ease-in-out"
+			style="height: 100vh; height: 100dvh;"
 		>
 			<div class="safe-top bg-background-dark/50 backdrop-blur-md"></div>
 			<div class="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-background-dark shrink-0">
@@ -32,7 +33,7 @@ templ DetailDrawer() {
 					<span class="material-symbols-outlined">close</span>
 				</button>
 			</div>
-			<div id="drawer-content" class="flex-1 overflow-y-auto no-scrollbar safe-bottom">
+			<div id="drawer-content" class="flex-1 overflow-y-auto no-scrollbar safe-bottom" style="flex: 1 1 0%; overflow-y: auto;">
 				<!-- Content will be swapped here by HTMX -->
 			</div>
 		</div>
@@ -40,9 +41,9 @@ templ DetailDrawer() {
 }
 
 templ DetailContent(torrent rtorrent.Torrent, files []rtorrent.File) {
-	<div x-data="{ activeTab: 'overview' }" class="flex flex-col min-h-full bg-background-dark">
+	<div x-data="{ activeTab: 'overview' }" class="flex flex-col min-h-full bg-background-dark" style="min-height: 100%; display: flex; flex-direction: column;">
 		<!-- Hero Section -->
-		<div class="p-8 pb-0 flex flex-col items-center bg-background-dark">
+		<div class="p-8 pb-0 flex flex-col items-center bg-background-dark" style="padding: 2rem; padding-bottom: 0; display: flex; flex-direction: column; align-items: center;">
 			<!-- Close Button (Absolute) - Assuming close button is handled by parent -->
 			<!-- Circular Progress -->
 			<div class="relative size-48 mb-6">
