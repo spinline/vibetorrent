@@ -195,6 +195,7 @@ templ sortMenuItem(label, sortId, currentSort, currentOrder, filter string) {
 		class={ "w-full px-3 py-2 text-left text-sm rounded-lg flex items-center justify-between transition-colors " + getSortItemClass(currentSort == sortId) }
 		hx-get={ fmt.Sprintf("/list?filter=%s&sort=%s&order=%s", filter, sortId, getNextSortOrder(currentSort, currentOrder, sortId)) }
 		hx-target="#torrent-list"
+		hx-select="#torrent-list > *"
 		hx-swap="innerHTML"
 		@click="open = false"
 	>
