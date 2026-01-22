@@ -14,7 +14,7 @@ templ TorrentCard(t rtorrent.Torrent) {
 		hx-get={ fmt.Sprintf("/torrent/%s/details", t.Hash) }
 		hx-target="#drawer-content"
 		hx-trigger="click"
-		hx-on::after-request="if(!this._x_dataStack[0].longPressTriggered) $dispatch('open-drawer')"
+		@htmx:after-request.camel="if(!longPressTriggered) $dispatch('open-drawer')"
 		@contextmenu.prevent="$dispatch('open-context-menu', {x: $event.clientX, y: $event.clientY, hash: hash, name: name, priority: priority})"
 		@touchstart="longPressTriggered = false; pressTimer = setTimeout(() => { longPressTriggered = true; if (window.navigator.vibrate) window.navigator.vibrate(40); $dispatch('open-context-menu', {x: $event.touches[0].clientX, y: $event.touches[0].clientY, hash: hash, name: name, priority: priority}); }, 500)"
 		@touchend="clearTimeout(pressTimer); if(longPressTriggered) $event.preventDefault()"

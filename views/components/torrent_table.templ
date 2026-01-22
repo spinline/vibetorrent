@@ -179,11 +179,7 @@ templ tableHeader(label, id, currentSort, currentOrder, filter string, rightAlig
 		<div class={ "flex items-center gap-1 " + getHeaderContentClass(rightAlign) }>
 			{ label }
 			if currentSort == id {
-				if currentOrder == "asc" {
-					<span class="material-symbols-outlined text-xs">arrow_upward</span>
-				} else {
-					<span class="material-symbols-outlined text-xs">arrow_downward</span>
-				}
+				<span class="material-symbols-outlined text-xs">{ getTableSortArrowIcon(id, currentOrder) }</span>
 			} else {
 				<span class="material-symbols-outlined text-xs text-slate-300 dark:text-slate-700 opacity-0 group-hover:opacity-100 transition-opacity">unfold_more</span>
 			}
@@ -217,4 +213,20 @@ func getNextOrder(currentSort, currentOrder, id string) string {
 		return "desc"
 	}
 	return "asc"
+}
+
+// Text fields (name, state) show arrows inverted: asc (A-Z) = down arrow, desc (Z-A) = up arrow
+// Numeric fields show: asc (1-10) = up arrow, desc (10-1) = down arrow
+func getTableSortArrowIcon(sortId, order string) string {
+	isTextField := sortId == "name" || sortId == "state"
+	if isTextField {
+		if order == "asc" {
+			return "arrow_downward"
+		}
+		return "arrow_upward"
+	}
+	if order == "asc" {
+		return "arrow_upward"
+	}
+	return "arrow_downward"
 }
