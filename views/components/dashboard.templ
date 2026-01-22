@@ -44,17 +44,26 @@ templ DashboardMainArea(props DashboardProps) {
 			class="shrink-0 border-b border-slate-800 bg-background-dark/80 backdrop-blur-xl sticky top-0 z-30"
 		>
 			<div class="safe-top"></div>
-			<div class="h-16 flex items-center justify-between px-4 md:px-8">
-				<div class="flex items-center gap-3 md:gap-6 flex-1">
+			<!-- Mobile Header: Title + Sort -->
+			<div class="md:hidden h-14 flex items-center justify-between px-4">
+				<div class="flex items-center gap-3">
 					<button
 						id="mobile-menu-toggle"
 						@click="mobileMenuOpen = !mobileMenuOpen"
-						class="md:hidden text-slate-500 hover:text-white p-2 shrink-0"
+						class="text-slate-500 hover:text-white p-1 -ml-1"
 					>
 						<span class="material-symbols-outlined">menu</span>
 					</button>
-					<!-- Search Input - Both Mobile and Desktop -->
-					<div class="relative flex-1 max-w-xs md:max-w-64" x-data="{ query: '', timeout: null }">
+					<h1 class="text-xl font-bold text-white">Transferler</h1>
+				</div>
+				<div class="flex items-center gap-2">
+					@SortDropdown(props.SortBy, props.Order, props.Sidebar.Filter)
+				</div>
+			</div>
+			<!-- Desktop Header: Search + Settings -->
+			<div class="hidden md:flex h-16 items-center justify-between px-8">
+				<div class="flex items-center gap-6 flex-1">
+					<div class="relative flex-1 max-w-64" x-data="{ query: '', timeout: null }">
 						<span
 							class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm"
 						>search</span>
@@ -78,14 +87,10 @@ templ DashboardMainArea(props DashboardProps) {
 						</button>
 					</div>
 				</div>
-				<div class="flex items-center gap-3 shrink-0">
-					<!-- Sort Button for Mobile Only -->
-					<div class="md:hidden">
-						@SortDropdown(props.SortBy, props.Order, props.Sidebar.Filter)
-					</div>
+				<div class="flex items-center gap-4 shrink-0">
 					<a
 						href="/settings"
-						class="hidden md:flex size-10 rounded-full bg-surface-dark border border-slate-800 items-center justify-center text-slate-400 hover:text-primary transition-colors"
+						class="size-10 rounded-full bg-surface-dark border border-slate-800 flex items-center justify-center text-slate-400 hover:text-primary transition-colors"
 					>
 						<span class="material-symbols-outlined">settings</span>
 					</a>
@@ -96,6 +101,30 @@ templ DashboardMainArea(props DashboardProps) {
 			class="flex-1 overflow-y-auto no-scrollbar relative scroll-touch"
 			id="scroll-container"
 		>
+			<!-- Mobile Search Bar -->
+			<div class="md:hidden px-4 py-3 border-b border-slate-800/50" x-data="{ query: '', timeout: null }">
+				<div class="relative">
+					<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">search</span>
+					<input
+						type="text"
+						placeholder="Filter torrents..."
+						class="w-full bg-slate-800/50 border border-slate-700/50 rounded-xl pl-9 pr-8 py-2.5 text-sm text-slate-300 focus:ring-1 focus:ring-primary focus:border-primary"
+						x-model="query"
+						x-ref="searchInput"
+						@input="clearTimeout(timeout); timeout = setTimeout(() => { htmx.ajax('GET', '/list?filter=' + encodeURIComponent(activeFilter) + '&search=' + encodeURIComponent(query), '#torrent-list'); }, 300)"
+						@keydown.escape="query = ''; $refs.searchInput.blur(); htmx.ajax('GET', '/list?filter=' + encodeURIComponent(activeFilter), '#torrent-list');"
+					/>
+					<button
+						type="button"
+						x-show="query.length > 0"
+						x-cloak
+						@click="query = ''; $refs.searchInput.blur(); htmx.ajax('GET', '/list?filter=' + encodeURIComponent(activeFilter), '#torrent-list');"
+						class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200"
+					>
+						<span class="material-symbols-outlined text-lg">close</span>
+					</button>
+				</div>
+			</div>
 			<div class="p-3 md:p-8">
 				<!-- Stats Grid - Both Mobile and Desktop -->
 				@StatsGrid(props.Stats)
