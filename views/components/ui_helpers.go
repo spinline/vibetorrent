@@ -77,6 +77,17 @@ func GetProgressColor(state string) string {
 	}
 }
 
+func GetProgressColorStyle(state string) string {
+	switch state {
+	case "seeding":
+		return "background-color: #10b981;"
+	case "paused", "stopped":
+		return "background-color: #f97316;"
+	default:
+		return "background-color: #0d9488;"
+	}
+}
+
 func GetStatusBadge(state string) string {
 	color := "text-slate-500 bg-slate-500/10"
 	icon := "help"
@@ -146,6 +157,21 @@ func getStatusIconBg(state string) string {
 	}
 }
 
+func getStatusIconBgStyle(state string) string {
+	switch state {
+	case "downloading":
+		return "background-color: rgba(13, 148, 136, 0.2);"
+	case "seeding":
+		return "background-color: rgba(16, 185, 129, 0.2);"
+	case "paused", "stopped":
+		return "background-color: rgba(249, 115, 22, 0.2);"
+	case "checking":
+		return "background-color: rgba(59, 130, 246, 0.2);"
+	default:
+		return "background-color: rgba(51, 65, 85, 0.5);"
+	}
+}
+
 func getStatusIconColor(state string) string {
 	switch state {
 	case "downloading":
@@ -158,6 +184,21 @@ func getStatusIconColor(state string) string {
 		return "text-blue-500"
 	default:
 		return "text-slate-400"
+	}
+}
+
+func getStatusIconColorStyle(state string) string {
+	switch state {
+	case "downloading":
+		return "color: #0d9488;"
+	case "seeding":
+		return "color: #10b981;"
+	case "paused", "stopped":
+		return "color: #f97316;"
+	case "checking":
+		return "color: #3b82f6;"
+	default:
+		return "color: #94a3b8;"
 	}
 }
 

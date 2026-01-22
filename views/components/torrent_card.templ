@@ -20,10 +20,16 @@ templ TorrentCard(t rtorrent.Torrent) {
 		@touchmove="clearTimeout(pressTimer)"
 	>
 		<!-- Header: Icon + Title + Menu -->
-		<div class="flex items-start gap-3 mb-3">
+		<div class="flex items-start gap-3 mb-3" style="display: flex; align-items: flex-start; gap: 0.75rem; margin-bottom: 0.75rem;">
 			<!-- Status Icon -->
-			<div class={ "flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center " + getStatusIconBg(t.State) }>
-				<span class={ "material-symbols-outlined text-2xl " + getStatusIconColor(t.State) }>
+			<div 
+				class={ "flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center " + getStatusIconBg(t.State) }
+				style={ fmt.Sprintf("width: 3rem; height: 3rem; border-radius: 9999px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; %s", getStatusIconBgStyle(t.State)) }
+			>
+				<span 
+					class={ "material-symbols-outlined text-2xl " + getStatusIconColor(t.State) }
+					style={ getStatusIconColorStyle(t.State) }
+				>
 					{ getStatusIcon(t.State) }
 				</span>
 			</div>
@@ -57,10 +63,10 @@ templ TorrentCard(t rtorrent.Torrent) {
 		<!-- Progress Bar -->
 		<div class="mb-2">
 			<div class="flex items-center justify-between mb-1.5">
-				<span class="text-xs text-slate-500 font-medium">%{ fmt.Sprintf("%.0f", t.Progress) } Tamamlandı</span>
+				<span class="text-xs text-slate-500 font-medium" style="font-size: 0.75rem; color: #64748b;">%{ fmt.Sprintf("%.0f", t.Progress) } Tamamlandı</span>
 			</div>
 			<div class="h-1.5 bg-slate-700/50 rounded-full overflow-hidden" style="height: 0.375rem; background-color: rgba(51, 65, 85, 0.5); border-radius: 9999px; overflow: hidden;">
-				<div class={ "h-full transition-all duration-300 " + GetProgressColor(t.State) } style={ fmt.Sprintf("width: %.1f%%; height: 100%%", t.Progress) }></div>
+				<div class={ "h-full transition-all duration-300 " + GetProgressColor(t.State) } style={ fmt.Sprintf("width: %.1f%%; height: 100%%; %s", t.Progress, GetProgressColorStyle(t.State)) }></div>
 			</div>
 		</div>
 	</div>
