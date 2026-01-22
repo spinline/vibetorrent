@@ -11,63 +11,69 @@ templ TorrentCard(t rtorrent.Torrent) {
 		x-data={ fmt.Sprintf("{ deleted: false, pressTimer: null, longPressTriggered: false, hash: '%s', name: '%s', priority: %d }", t.Hash, t.Name, t.Priority) }
 		x-show="!deleted"
 		x-transition:leave="transition ease-in duration-300"
-		hx-get={ fmt.Sprintf("/torrent/%s/details", t.Hash) }
-		hx-target="#drawer-content"
-		hx-trigger="click"
-		@htmx:after-request.camel="if(!longPressTriggered) $dispatch('open-drawer')"
 		@contextmenu.prevent="$dispatch('open-context-menu', {x: $event.clientX, y: $event.clientY, hash: hash, name: name, priority: priority})"
 		@touchstart="longPressTriggered = false; pressTimer = setTimeout(() => { longPressTriggered = true; if (window.navigator.vibrate) window.navigator.vibrate(40); $dispatch('open-context-menu', {x: $event.touches[0].clientX, y: $event.touches[0].clientY, hash: hash, name: name, priority: priority}); }, 500)"
 		@touchend="clearTimeout(pressTimer); if(longPressTriggered) $event.preventDefault()"
 		@touchmove="clearTimeout(pressTimer)"
 	>
-		<!-- Header: Icon + Title + Menu -->
-		<div class="flex items-start gap-3 mb-3" style="display: flex; align-items: flex-start; gap: 0.75rem; margin-bottom: 0.75rem;">
-			<!-- Status Icon -->
-			<div 
-				class={ "flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center " + getStatusIconBg(t.State) }
-				style={ fmt.Sprintf("width: 3rem; height: 3rem; border-radius: 9999px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; %s", getStatusIconBgStyle(t.State)) }
-			>
-				<span 
-					class={ "material-symbols-outlined text-2xl " + getStatusIconColor(t.State) }
-					style={ getStatusIconColorStyle(t.State) }
+		<!-- Clickable Area for Detail -->
+		<div 
+			class="card-click-area cursor-pointer"
+			hx-get={ fmt.Sprintf("/torrent/%s/details", t.Hash) }
+			hx-target="#drawer-content"
+			hx-swap="innerHTML"
+			hx-trigger="click"
+			@click="if(!longPressTriggered) { setTimeout(() => $dispatch('open-drawer'), 50) }"
+		>
+			<!-- Header: Icon + Title -->
+			<div class="flex items-start gap-3 mb-3" style="display: flex; align-items: flex-start; gap: 0.75rem; margin-bottom: 0.75rem;">
+				<!-- Status Icon -->
+				<div 
+					class={ "flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center " + getStatusIconBg(t.State) }
+					style={ fmt.Sprintf("width: 3rem; height: 3rem; border-radius: 9999px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; %s", getStatusIconBgStyle(t.State)) }
 				>
-					{ getStatusIcon(t.State) }
-				</span>
-			</div>
-			
-			<!-- Title & Meta -->
-			<div class="flex-1 min-w-0">
-				<h3 class="text-base font-semibold text-white leading-tight mb-1 line-clamp-2">{ t.Name }</h3>
-				<div class="flex items-center flex-wrap gap-x-2 gap-y-1 text-sm text-slate-400">
-					<span class="font-medium">{ FormatBytes(t.Size) }</span>
-					<span class="text-slate-600">•</span>
-					@templ.Raw(GetStatusText(t.State))
-					if t.State == "downloading" && t.DownloadRate > 0 {
-						<span class="text-slate-600">•</span>
-						<span class="text-primary font-medium">{ FormatSpeed(t.DownloadRate) }</span>
-						<span class="text-slate-600">•</span>
-						<span class="text-slate-400 font-medium">ETA: { FormatETA(t.Size, t.Completed, t.DownloadRate) }</span>
-					}
+					<span 
+						class={ "material-symbols-outlined text-2xl " + getStatusIconColor(t.State) }
+						style={ getStatusIconColorStyle(t.State) }
+					>
+						{ getStatusIcon(t.State) }
+					</span>
 				</div>
+				
+				<!-- Title & Meta -->
+				<div class="flex-1 min-w-0">
+					<h3 class="text-base font-semibold text-white leading-tight mb-1 line-clamp-2">{ t.Name }</h3>
+					<div class="flex items-center flex-wrap gap-x-2 gap-y-1 text-sm text-slate-400">
+						<span class="font-medium">{ FormatBytes(t.Size) }</span>
+						<span class="text-slate-600">•</span>
+						@templ.Raw(GetStatusText(t.State))
+						if t.State == "downloading" && t.DownloadRate > 0 {
+							<span class="text-slate-600">•</span>
+							<span class="text-primary font-medium">{ FormatSpeed(t.DownloadRate) }</span>
+							<span class="text-slate-600">•</span>
+							<span class="text-slate-400 font-medium">ETA: { FormatETA(t.Size, t.Completed, t.DownloadRate) }</span>
+						}
+					</div>
+				</div>
+				
+				<!-- Menu Button - Outside click area -->
+				<button
+					class="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full hover:bg-slate-700/50 transition-colors text-slate-400 hover:text-slate-300"
+					style="width: 2.5rem; height: 2.5rem; display: flex; align-items: center; justify-content: center; border-radius: 9999px; flex-shrink: 0; background-color: transparent;"
+					@click.stop="$dispatch('open-context-menu', {x: $event.clientX, y: $event.clientY, hash: hash, name: name, priority: priority})"
+				>
+					<span class="material-symbols-outlined" style="font-family: 'Material Symbols Outlined'; font-size: 24px; color: #94a3b8;">more_vert</span>
+				</button>
 			</div>
 			
-			<!-- Menu Button -->
-			<button
-				class="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full hover:bg-slate-700/50 transition-colors text-slate-400 hover:text-slate-300"
-				style="width: 2.5rem; height: 2.5rem; display: flex; align-items: center; justify-content: center; border-radius: 9999px; flex-shrink: 0; background-color: transparent;"
-				@click.stop="$dispatch('open-context-menu', {x: $event.clientX, y: $event.clientY, hash: hash, name: name, priority: priority})"
-			>
-				<span class="material-symbols-outlined" style="font-family: 'Material Symbols Outlined'; font-size: 24px; color: #94a3b8;">more_vert</span>
-			</button>
-		</div>
-		
-		<!-- Progress Bar -->
-		<div class="mb-2">
-			<div class="flex items-center justify-between mb-1.5">
-				<span class="text-xs text-slate-500 font-medium" style="font-size: 0.75rem; color: #64748b;">%{ fmt.Sprintf("%.0f", t.Progress) } Tamamlandı</span>
-			</div>
-			<div class="h-1.5 bg-slate-700/50 rounded-full overflow-hidden" style="height: 0.375rem; background-color: rgba(51, 65, 85, 0.5); border-radius: 9999px; overflow: hidden;">
-				<div class={ "h-full transition-all duration-300 " + GetProgressColor(t.State) } style={ fmt.Sprintf("width: %.1f%%; height: 100%%; %s", t.Progress, GetProgressColorStyle(t.State)) }></div>
+			<!-- Progress Bar -->
+			<div class="mb-2">
+				<div class="flex items-center justify-between mb-1.5">
+					<span class="text-xs text-slate-500 font-medium" style="font-size: 0.75rem; color: #64748b;">%{ fmt.Sprintf("%.0f", t.Progress) } Tamamlandı</span>
+				</div>
+				<div class="h-1.5 bg-slate-700/50 rounded-full overflow-hidden" style="height: 0.375rem; background-color: rgba(51, 65, 85, 0.5); border-radius: 9999px; overflow: hidden;">
+					<div class={ "h-full transition-all duration-300 " + GetProgressColor(t.State) } style={ fmt.Sprintf("width: %.1f%%; height: 100%%; %s", t.Progress, GetProgressColorStyle(t.State)) }></div>
+				</div>
 			</div>
 		</div>
 	</div>
