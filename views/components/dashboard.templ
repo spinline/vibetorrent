@@ -201,9 +201,9 @@ templ sortMenuItem(label, sortId, currentSort, currentOrder, filter string) {
 		<span>{ label }</span>
 		if currentSort == sortId {
 			if currentOrder == "asc" {
-				<span class="material-symbols-outlined text-sm text-primary">arrow_upward</span>
-			} else {
 				<span class="material-symbols-outlined text-sm text-primary">arrow_downward</span>
+			} else {
+				<span class="material-symbols-outlined text-sm text-primary">arrow_upward</span>
 			}
 		}
 	</button>
